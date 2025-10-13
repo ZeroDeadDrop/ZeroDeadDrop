@@ -1,0 +1,2295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:;">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ZeroDeadDrop - Stateless Offline Secure File Encryption</title>
+    <style>
+        :root {
+            --primary-color: #5D5CDE;
+            --primary-dark: #4F4EC6;
+            --background-color: #F8F9FA;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --button-text: #ffffff;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --error-bg: #fef2f2;
+            --error-border: #fecaca;
+            --info-bg: #eff6ff;
+            --info-border: #bfdbfe;
+            --spinner-border: #f3f3f3;
+            --spinner-top: #5D5CDE;
+            --list-bg: #f9fafb;
+            --list-border: #e5e7eb;
+            --accent-glow: rgba(93, 92, 222, 0.1);
+            --security-green: #059669;
+            --security-green-bg: #ecfdf5;
+            --gradient-start: #5D5CDE;
+            --gradient-end: #4F4EC6;
+            --header-color: #000000;
+        }
+        .dark {
+            --background-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e5e5e5;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --input-bg: #27272a;
+            --input-border: #4b5563;
+            --success-bg: #134e4a;
+            --success-border: #059669;
+            --error-bg: #7f1d1d;
+            --error-border: #ef4444;
+            --info-bg: #1e3a8a;
+            --info-border: #3b82f6;
+            --spinner-border: #27272a;
+            --spinner-top: #5D5CDE;
+            --list-bg: #27272a;
+            --list-border: #4b5563;
+            --accent-glow: rgba(93, 92, 222, 0.2);
+            --security-green: #10b981;
+            --security-green-bg: #064e3b;
+            --gradient-start: #5D5CDE;
+            --gradient-end: #7C7CFF;
+            --header-color: #ffffff;
+        }
+        * { box-sizing: border-box; }
+        body { 
+            min-height: 100vh;
+            margin: 0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem 1rem;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            opacity: 0.8;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .loading-spinner {
+            border: 4px solid var(--spinner-border);
+            border-top: 4px solid var(--spinner-top); 
+            border-radius: 50%;
+            width: 20px; 
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .input-text-area, select.input-text-area, input[type="number"].input-text-area {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: 0.75rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .input-text-area:focus, select.input-text-area:focus, input[type="number"].input-text-area:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            outline: none;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--list-border);
+            border-radius: 0.75rem;
+            background-color: var(--list-bg);
+            transition: all 0.3s ease;
+        }
+        .list-item:hover {
+            transform: translateX(4px);
+            border-color: var(--primary-color);
+        }
+        .hero-title {
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.1;
+            color: var(--header-color);
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 0.5rem auto 2rem;
+            max-width: 900px;
+            line-height: 1.5;
+        }
+        .button-primary {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--button-text);
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .button-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(93, 92, 222, 0.3);
+        }
+        .button-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            height: 6px;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .encryption-visual {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            margin: 1rem 0;
+        }
+        .encryption-block {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            animation: blockPulse 2s infinite;
+        }
+        .encryption-block:nth-child(8n+1) { background-color: #ef4444; animation-delay: 0s; }
+        .encryption-block:nth-child(8n+2) { background-color: #ec4899; animation-delay: 0.1s; }
+        .encryption-block:nth-child(8n+3) { background-color: #a855f7; animation-delay: 0.2s; }
+        .encryption-block:nth-child(8n+4) { background-color: #6366f1; animation-delay: 0.3s; }
+        .encryption-block:nth-child(8n+5) { background-color: #3b82f6; animation-delay: 0.4s; }
+        .encryption-block:nth-child(8n+6) { background-color: #06b6d4; animation-delay: 0.5s; }
+        .encryption-block:nth-child(8n+7) { background-color: #14b8a6; animation-delay: 0.6s; }
+        .encryption-block:nth-child(8n) { background-color: #22c55e; animation-delay: 0.7s; }
+        @keyframes blockPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .checkbox-option:hover {
+            border-color: var(--primary-color);
+        }
+        .checkbox-option input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+        .warning-banner {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #856404;
+        }
+        .dark .warning-banner {
+            background: #664d03;
+            border-color: #ffc107;
+            color: #ffecb5;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 90%;
+            max-height: 90vh;
+            width: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--list-bg);
+            margin: 1rem -2rem 0;
+            padding: 0 2rem;
+        }
+        .tab-button {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .tab-button.active {
+            border-bottom: 2px solid #14b8a6;
+            color: #14b8a6;
+            background: var(--card-bg);
+        }
+        .hidden { display: none !important; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .w-full { width: 100%; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .pt-4 { padding-top: 1rem; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .list-disc { list-style-type: disc; word-break: break-word; overflow-wrap: break-word; }
+        .pl-6 { padding-left: 1.5rem; }
+        .overflow-y-auto { overflow-y: auto; }
+        .max-h-64 { max-height: 16rem; }
+        .timer-red { color: red; font-weight: bold; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        @media (max-width: 768px) {
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            .passphrase-container {
+                flex-direction: column;
+            }
+            .passphrase-container input {
+                margin-bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="instructionsModal" class="modal-overlay hidden" onclick="if(event.target === this) toggleInstructions()">
+        <div class="modal-content">
+            <button class="modal-close" onclick="toggleInstructions()">&times;</button>
+            <div id="instructionsContent"></div>
+        </div>
+    </div>
+    <script>
+        (function checkCompatibility() {
+            if (!window.crypto || !window.crypto.subtle || !performance.now) {
+                document.body.innerHTML = '<div style="padding:2rem;text-align:center;color:red;font-size:1.5rem;">ERROR: Web Crypto API or performance.now() not supported. Use Chrome 88+, Firefox 85+, Safari 14+, or Edge 88+</div>';
+                throw new Error("Incompatible browser");
+            }
+        })();
+
+        const renderDebounceTimers = new Map();
+        function debouncedRender(func, key) {
+            if (renderDebounceTimers.has(key)) {
+                clearTimeout(renderDebounceTimers.get(key));
+            }
+            const timer = setTimeout(() => {
+                func();
+                renderDebounceTimers.delete(key);
+            }, 150);
+            renderDebounceTimers.set(key, timer);
+        }
+
+        const CHUNK_SIZE = 2097152;
+        const MAX_TEXT_LENGTH = 1000000;
+        const MAX_TOTAL_SIZE = 1073741824;
+        const PURGE_DELAY = 300;
+        const INACTIVITY_TIMEOUT = 300;
+        const PROGRESS_UPDATE_INTERVAL = 100;
+
+        function generateRandomId(length = 16) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/';
+            const array = new Uint8Array(length);
+            crypto.getRandomValues(array);
+            return Array.from(array, (byte) => chars[byte % chars.length]).join('');
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function arrayBufferToBase64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return btoa(binary);
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function arrayToBase64(arr) {
+            const chunks = [];
+            const len = arr.length;
+            for (let i = 0; i < len; i += 32768) {
+                chunks.push(String.fromCharCode.apply(null, arr.subarray(i, i + 32768)));
+            }
+            return btoa(chunks.join(''));
+        }
+
+        function base64ToArray(base64) {
+            const binary = atob(base64);
+            const len = binary.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes;
+        }
+
+        function validateJSON(jsonString, expectedType) {
+            try {
+                const parsed = JSON.parse(jsonString);
+                
+                if (expectedType === 'manifest') {
+                    if (!parsed.manifestId || !parsed.encodedItems || !Array.isArray(parsed.encodedItems)) {
+                        throw new Error("Invalid manifest: missing manifestId or encodedItems");
+                    }
+                    if (!parsed.iterations || !parsed.hashAlgorithm) {
+                        throw new Error("Missing encryption parameters");
+                    }
+                    if (parsed.encodedItems.length === 0) {
+                        throw new Error("Manifest contains no items");
+                    }
+                } else if (expectedType === 'bundle') {
+                    if (!parsed.chunks || !Array.isArray(parsed.chunks)) {
+                        throw new Error("Invalid bundle: missing chunks array");
+                    }
+                    if (parsed.chunks.length === 0) {
+                        throw new Error("Bundle is empty");
+                    }
+                    for (let i = 0; i < Math.min(parsed.chunks.length, 5); i++) {
+                        const chunk = parsed.chunks[i];
+                        if (!chunk.chunkId || !chunk.cipher || !chunk.salt || !chunk.iv) {
+                            throw new Error(`Chunk ${i} is malformed`);
+                        }
+                    }
+                }
+                
+                return parsed;
+            } catch (e) {
+                throw new Error(`JSON validation failed: ${e.message}`);
+            }
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        let state = {
+            theme: 'dark',
+            showInstructionsModal: false,
+            textInput: '',
+            files: [],
+            passphrase: '',
+            iterations: 300000, 
+            hashAlgorithm: 'SHA-256',
+            isEncoding: false,
+            manifest: null,
+            chunkBundle: null,
+            progress: 0,
+            manifestInput: '',
+            decPassphrase: '',
+            isDecoding: false,
+            decProgress: 0,
+            decodedFiles: [],
+            chunkBundleFile: null,
+            chunkBundleInput: '',
+            manifestFile: null,
+            encryptedChunksMap: null,
+            showPassphrase: false,
+            showDecPassphrase: false,
+            blobUrls: [], 
+            autoDownloadBundle: true,
+            autoDownloadManifest: false,
+            activeTab: 'overview',
+            showManifestView: false,
+            showBundleView: false,
+            showAdvancedSettings: false,
+            purgeTimer: null,
+            inactivityTimer: null,
+            sessionStartTime: performance.now(),
+            remainingTime: PURGE_DELAY,
+            manifestValid: false,
+            manifestJson: '',
+            viewedTexts: {},
+            combineOutput: false,
+            showCombinedView: false,
+            combinedFile: null,
+            combinedInput: ''
+        };
+
+        let domElements = {};
+
+        async function deriveKey(passphrase, salt, iterations, hashAlgorithm) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                "raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]
+            );
+            return await crypto.subtle.deriveKey(
+                { name: "PBKDF2", salt, iterations, hash: hashAlgorithm },
+                keyMaterial, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]
+            );
+        }
+
+        async function encryptChunk(chunkBuffer, passphrase, iterations, hashAlgorithm) {
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveKey(passphrase, salt, iterations, hashAlgorithm);
+            const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, chunkBuffer);
+            return { 
+                cipher: arrayBufferToBase64(cipher),
+                salt: arrayToBase64(salt),
+                iv: arrayToBase64(iv)
+            };
+        }
+
+        async function decryptChunk(cipherB64, saltB64, ivB64, passphrase, iterations, hashAlgorithm) {
+            const cipher = base64ToArray(cipherB64);
+            const salt = base64ToArray(saltB64);
+            const iv = base64ToArray(ivB64);
+            const key = await deriveKey(passphrase, salt, iterations, hashAlgorithm);
+            const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+            return new Uint8Array(decrypted);
+        }
+
+        function cleanupBlobUrls() {
+            state.blobUrls.forEach(url => URL.revokeObjectURL(url));
+            state.blobUrls = [];
+        }
+
+        window.updateTheme = function() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            document.documentElement.classList.toggle('dark', state.theme === 'dark');
+            const themeButton = document.getElementById('themeButton');
+            if (themeButton) {
+                themeButton.innerHTML = state.theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+        
+        window.toggleInstructions = function() {
+            state.showInstructionsModal = !state.showInstructionsModal;
+            const modal = document.getElementById('instructionsModal');
+            modal.classList.toggle('hidden', !state.showInstructionsModal);
+            if (state.showInstructionsModal) {
+                renderInstructionsContent();
+            }
+            resetInactivityTimer();
+        }
+
+        window.handleTextChange = function(e) {
+            const newText = e.target.value;
+            if (newText.length > MAX_TEXT_LENGTH) {
+                alert("Text exceeds 1,000,000 character limit");
+                e.target.value = state.textInput;
+                return;
+            }
+            state.textInput = newText;
+            const charCount = document.querySelector('#charCount');
+            if (charCount) {
+                charCount.textContent = `Characters: ${newText.length.toLocaleString()} / ${MAX_TEXT_LENGTH.toLocaleString()}`;
+            }
+            resetInactivityTimer();
+        }
+
+        window.handleFileChange = function(e) {
+            if (!e.target.files || e.target.files.length === 0) {
+                return;
+            }
+            const newFiles = Array.from(e.target.files);
+            const currentSize = state.files.reduce((acc, f) => acc + f.size, 0) + (state.textInput.length * 2);
+            const newSize = newFiles.reduce((acc, f) => acc + f.size, 0);
+            
+            if (currentSize + newSize > MAX_TOTAL_SIZE) {
+                alert("Total size would exceed 1GB limit");
+                e.target.value = '';
+                return;
+            }
+            
+            state.files = [...state.files, ...newFiles];
+            e.target.value = '';
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.removeFile = function(index) {
+            state.files = state.files.filter((_, i) => i !== index);
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.clearTextInput = function() {
+            state.textInput = '';
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.togglePassphraseVisibility = function() {
+            state.showPassphrase = !state.showPassphrase;
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.toggleDecPassphraseVisibility = function() {
+            state.showDecPassphrase = !state.showDecPassphrase;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.generatePassphrase = function() {
+            state.passphrase = generateRandomId(24);
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.toggleManifestView = function() {
+            state.showManifestView = !state.showManifestView;
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.toggleBundleView = function() {
+            state.showBundleView = !state.showBundleView;
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.toggleAdvancedSettings = function() {
+            state.showAdvancedSettings = !state.showAdvancedSettings;
+            renderEncoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleEncode = async function() {
+            const hasText = state.textInput.trim().length > 0;
+            const totalItems = state.files.length + (hasText ? 1 : 0);
+            
+            if (totalItems === 0) {
+                alert("Please enter text or select files to encrypt");
+                return;
+            }
+            if (state.passphrase.length < 8) {
+                alert("Passphrase must be at least 8 characters long");
+                return;
+            }
+
+            state.isEncoding = true;
+            state.progress = 0;
+            state.manifest = null;
+            state.chunkBundle = null;
+            state.lastProgressUpdate = performance.now();
+            renderEncoderPanel();
+
+            const manifestId = generateRandomId(16);
+            const itemsToEncode = [];
+            const chunkBundle = { chunks: [] };
+
+            try {
+                if (hasText) {
+                    const textBlob = new Blob([state.textInput], { type: 'text/plain' });
+                    itemsToEncode.push({
+                        dataItemId: generateRandomId(8),
+                        originalName: `note_${generateRandomId(8)}.txt`,
+                        originalType: 'text/plain',
+                        blob: textBlob,
+                        chunkIds: []
+                    });
+                }
+
+                for (const file of state.files) {
+                    itemsToEncode.push({
+                        dataItemId: generateRandomId(8),
+                        originalName: file.name,
+                        originalType: file.type || 'application/octet-stream',
+                        blob: file,
+                        chunkIds: []
+                    });
+                }
+
+                const totalSize = itemsToEncode.reduce((sum, item) => sum + item.blob.size, 0);
+                if (totalSize > 512 * 1024 * 1024) {
+                    if (!confirm("Large data detected (>512MB). This may cause browser crash on low-memory devices. Different browsers have varying memory limits. Continue?")) {
+                        state.isEncoding = false;
+                        renderEncoderPanel();
+                        return;
+                    }
+                }
+
+                const totalChunks = itemsToEncode.reduce((sum, item) => sum + Math.ceil(item.blob.size / CHUNK_SIZE), 0);
+                let chunksProcessed = 0;
+                const encodedItems = [];
+
+                for (const item of itemsToEncode) {
+                    const numChunks = Math.ceil(item.blob.size / CHUNK_SIZE);
+                    if (numChunks === 0) continue;
+                    
+                    for (let i = 0; i < numChunks; i++) {
+                        if (!state.isEncoding) {
+                            throw new Error("Encryption cancelled by user");
+                        }
+
+                        const offset = i * CHUNK_SIZE;
+                        const slice = item.blob.slice(offset, offset + CHUNK_SIZE);
+                        const chunkBuffer = await slice.arrayBuffer(); 
+                        
+                        const chunkId = generateRandomId(12);
+                        const encrypted = await encryptChunk(
+                            chunkBuffer,
+                            state.passphrase,
+                            state.iterations,
+                            state.hashAlgorithm
+                        );
+                        
+                        chunkBundle.chunks.push({
+                            chunkId,
+                            cipher: encrypted.cipher,
+                            salt: encrypted.salt,
+                            iv: encrypted.iv
+                        });
+                        item.chunkIds.push({ id: chunkId, chunkIndex: i });
+                        
+                        chunksProcessed++;
+                        
+                        const now = performance.now();
+                        if (now - state.lastProgressUpdate > PROGRESS_UPDATE_INTERVAL) {
+                            state.progress = (chunksProcessed / totalChunks) * 100;
+                            renderEncoderPanel();
+                            state.lastProgressUpdate = now;
+                        }
+                    }
+                    
+                    const nameBuffer = new TextEncoder().encode(item.originalName);
+                    const encryptedName = await encryptChunk(
+                        nameBuffer,
+                        state.passphrase,
+                        state.iterations,
+                        state.hashAlgorithm
+                    );
+
+                    const typeBuffer = new TextEncoder().encode(item.originalType);
+                    const encryptedType = await encryptChunk(
+                        typeBuffer,
+                        state.passphrase,
+                        state.iterations,
+                        state.hashAlgorithm
+                    );
+
+                    encodedItems.push({
+                        dataItemId: item.dataItemId,
+                        encryptedName,
+                        encryptedType,
+                        fileSize: item.blob.size,
+                        chunkIds: item.chunkIds,
+                        chunkCount: numChunks
+                    });
+                }
+
+                const finalManifest = {
+                    manifestId,
+                    timestamp: performance.now(),
+                    totalItems,
+                    totalChunks,
+                    totalSize: itemsToEncode.reduce((sum, i) => sum + i.blob.size, 0),
+                    encodedItems,
+                    iterations: state.iterations,
+                    hashAlgorithm: state.hashAlgorithm
+                };
+
+                state.manifest = finalManifest;
+                state.chunkBundle = chunkBundle;
+                state.progress = 100;
+
+                if (state.autoDownloadBundle) {
+                    downloadBundle();
+                }
+                if (state.autoDownloadManifest) {
+                    downloadManifest();
+                }
+                if (state.combineOutput && (state.autoDownloadBundle || state.autoDownloadManifest)) {
+                    const combined = {manifest: state.manifest, bundle: state.chunkBundle};
+                    const combinedBlob = new Blob([JSON.stringify(combined)], { type: 'application/json' });
+                    const url = URL.createObjectURL(combinedBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `zd_combined_${generateRandomId(8)}.json`;
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                }
+
+                state.passphrase = '';
+                alert(`✅ Encryption complete! ${encodedItems.length} items encrypted into ${totalChunks} secure chunks.`);
+            } catch (e) {
+                
+                let userMessage = "Encryption failed: ";
+                if (e.message.includes("cancelled")) {
+                    userMessage += "Operation was cancelled.";
+                } else if (e.message.includes("memory") || e.name === "QuotaExceededError") {
+                    userMessage += "Out of memory. Try smaller files.";
+                } else {
+                    userMessage += e.message;
+                }
+                
+                alert(userMessage);
+            } finally {
+                state.isEncoding = false;
+                renderEncoderPanel();
+            }
+        }
+
+        function downloadBundle() {
+            if (!state.chunkBundle) return;
+            const chunkBundleBlob = new Blob([JSON.stringify(state.chunkBundle)], { type: 'application/json' });
+            const url = URL.createObjectURL(chunkBundleBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `zd_bundle_${generateRandomId(8)}.json`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            resetInactivityTimer();
+        }
+
+        function copyToClipboard(text, successMsg, errorMsg) {
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            const isIOS = navigator.userAgent.match(/ipad|ipod|iphone/i);
+            if (isIOS) {
+                dummy.contentEditable = true;
+                dummy.readOnly = true;
+                const range = document.createRange();
+                range.selectNodeContents(dummy);
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+                dummy.setSelectionRange(0, 999999);
+            } else {
+                dummy.select();
+            }
+            try {
+                document.execCommand("copy");
+                alert(successMsg);
+            } catch (err) {
+                alert(errorMsg);
+            }
+            document.body.removeChild(dummy);
+        }
+
+        function copyBundle() {
+            if (!state.chunkBundle) return alert("No bundle to copy.");
+            const text = JSON.stringify(state.chunkBundle, null, 2);
+            copyToClipboard(text, "✅ Bundle copied to clipboard", "❌ Failed to copy bundle.");
+            resetInactivityTimer();
+        }
+
+        function downloadManifest() {
+            if (!state.manifest) return;
+            const manifestBlob = new Blob([JSON.stringify(state.manifest, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(manifestBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `zd_manifest_${generateRandomId(8)}.json`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            resetInactivityTimer();
+        }
+
+        function copyManifest() {
+            if (!state.manifest) return alert("No manifest to copy.");
+            const text = JSON.stringify(state.manifest, null, 2);
+            copyToClipboard(text, "✅ Manifest copied to clipboard", "❌ Failed to copy manifest.");
+            resetInactivityTimer();
+        }
+
+        function downloadCombined() {
+            if (!state.manifest || !state.chunkBundle) return;
+            const combined = {manifest: state.manifest, bundle: state.chunkBundle};
+            const blob = new Blob([JSON.stringify(combined, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `zd_combined_${generateRandomId(8)}.json`;
+            link.click();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        function copyCombined() {
+            if (!state.manifest || !state.chunkBundle) return alert("No data to copy.");
+            const combined = {manifest: state.manifest, bundle: state.chunkBundle};
+            const text = JSON.stringify(combined, null, 2);
+            copyToClipboard(text, "✅ Combined copied to clipboard", "❌ Failed to copy combined.");
+            resetInactivityTimer();
+        }
+
+        window.toggleCombinedView = function() {
+            state.showCombinedView = !state.showCombinedView;
+            renderEncoderPanel();
+        }
+
+        async function importChunkBundle() {
+            let chunkBundle;
+            
+            try {
+                let text;
+                if (state.chunkBundleFile) {
+                    text = await state.chunkBundleFile.text();
+                } else if (state.chunkBundleInput.trim()) {
+                    text = state.chunkBundleInput;
+                } else {
+                    alert("Please select a file or paste JSON");
+                    return;
+                }
+
+                chunkBundle = validateJSON(text, 'bundle');
+
+                const chunksMap = new Map();
+                chunkBundle.chunks.forEach(chunk => {
+                    chunksMap.set(chunk.chunkId, {
+                        cipher: chunk.cipher,
+                        salt: chunk.salt,
+                        iv: chunk.iv
+                    });
+                });
+                
+                state.encryptedChunksMap = chunksMap;
+                alert(`✅ Imported ${chunkBundle.chunks.length} encrypted chunks`);
+                renderDecoderPanel();
+                resetInactivityTimer();
+            } catch (e) {
+                alert(`❌ Bundle import failed: ${e.message}`);
+            }
+        }
+
+        async function importManifest() {
+            try {
+                let text;
+                if (state.manifestFile) {
+                    text = await state.manifestFile.text();
+                } else if (state.manifestInput.trim()) {
+                    text = state.manifestInput;
+                } else {
+                    alert("Please select a file or paste JSON");
+                    return;
+                }
+
+                const parsed = validateJSON(text, 'manifest');
+                state.manifestJson = text;
+                state.manifestValid = true;
+                alert(`✅ Manifest loaded (${parsed.totalItems} items, ${parsed.totalChunks} chunks)`);
+                renderDecoderPanel();
+                resetInactivityTimer();
+            } catch (e) {
+                state.manifestValid = false;
+                alert(`❌ Manifest load failed: ${e.message}`);
+            }
+        }
+
+        async function importCombined() {
+            let text;
+            if (state.combinedFile) {
+                text = await state.combinedFile.text();
+            } else if (state.combinedInput.trim()) {
+                text = state.combinedInput;
+            } else {
+                alert("Please select a file or paste JSON");
+                return;
+            }
+            try {
+                const combined = JSON.parse(text);
+                if (!combined.manifest || !combined.bundle) {
+                    throw new Error("Invalid combined format");
+                }
+                const manifest = validateJSON(JSON.stringify(combined.manifest), 'manifest');
+                const bundle = validateJSON(JSON.stringify(combined.bundle), 'bundle');
+                state.manifestJson = JSON.stringify(manifest);
+                state.manifestValid = true;
+                const chunksMap = new Map();
+                bundle.chunks.forEach(chunk => {
+                    chunksMap.set(chunk.chunkId, {
+                        cipher: chunk.cipher,
+                        salt: chunk.salt,
+                        iv: chunk.iv
+                    });
+                });
+                state.encryptedChunksMap = chunksMap;
+                alert(`✅ Imported combined: ${bundle.chunks.length} chunks, ${manifest.totalItems} items`);
+                renderDecoderPanel();
+            } catch (e) {
+                alert(`❌ Combined import failed: ${e.message}`);
+            }
+        }
+
+        window.handleDecode = async function() {
+            if (state.isDecoding) return;
+            
+            cleanupBlobUrls();
+            state.decodedFiles = [];
+            state.viewedTexts = {};
+            state.decProgress = 0;
+            state.lastProgressUpdate = performance.now();
+
+            if (state.decPassphrase.length < 8) {
+                alert("Passphrase must be at least 8 characters");
+                return;
+            }
+            if (!state.encryptedChunksMap) {
+                alert("Please import chunk bundle first");
+                return;
+            }
+
+            let manifestJson = state.manifestJson || state.manifestInput;
+            if (!manifestJson.trim()) {
+                alert("Please paste or upload the manifest JSON");
+                return;
+            }
+
+            let parsedManifest;
+            try {
+                parsedManifest = validateJSON(manifestJson, 'manifest');
+            } catch (e) {
+                alert(`❌ Invalid manifest: ${e.message}`);
+                return;
+            }
+
+            const totalSize = parsedManifest.totalSize || 0;
+            if (totalSize > 512 * 1024 * 1024) {
+                if (!confirm("Large data detected (>512MB). This may cause browser crash on low-memory devices. Different browsers have varying memory limits. Continue?")) {
+                    return;
+                }
+            }
+
+            state.isDecoding = true;
+            renderDecoderPanel();
+
+            const totalChunks = parsedManifest.encodedItems.reduce((sum, item) => sum + (item.chunkCount || 0), 0);
+            let chunksProcessed = 0;
+            const reconstructedFiles = [];
+
+            try {
+                for (const item of parsedManifest.encodedItems) {
+                    const numChunks = item.chunkCount || 0;
+                    if (numChunks === 0) continue;
+
+                    const fileChunks = new Array(numChunks);
+
+                    for (let i = 0; i < numChunks; i++) {
+                        if (!state.isDecoding) {
+                            throw new Error("Decryption cancelled by user");
+                        }
+
+                        const chunkMeta = item.chunkIds.find(c => c.chunkIndex === i);
+                        if (!chunkMeta) throw new Error(`Missing chunk metadata for index ${i}`);
+
+                        const encryptedChunk = state.encryptedChunksMap.get(chunkMeta.id);
+                        if (!encryptedChunk) throw new Error(`Chunk ${chunkMeta.id} not found in bundle`);
+
+                        const decrypted = await decryptChunk(
+                            encryptedChunk.cipher,
+                            encryptedChunk.salt,
+                            encryptedChunk.iv,
+                            state.decPassphrase,
+                            parsedManifest.iterations || 300000, 
+                            parsedManifest.hashAlgorithm || 'SHA-256'
+                        );
+                        
+                        fileChunks[i] = decrypted;
+                        chunksProcessed++;
+
+                        const now = performance.now();
+                        if (now - state.lastProgressUpdate > PROGRESS_UPDATE_INTERVAL) {
+                            state.decProgress = totalChunks > 0 ? (chunksProcessed / totalChunks) * 100 : 0;
+                            renderDecoderPanel();
+                            state.lastProgressUpdate = now;
+                        }
+                    }
+
+                    const totalLength = fileChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+                    const reconstructedBuffer = new Uint8Array(totalLength);
+                    let offset = 0;
+                    for (const chunk of fileChunks) {
+                        reconstructedBuffer.set(chunk, offset);
+                        offset += chunk.length;
+                    }
+
+                    const decryptedNameBytes = await decryptChunk(
+                        item.encryptedName.cipher,
+                        item.encryptedName.salt,
+                        item.encryptedName.iv,
+                        state.decPassphrase,
+                        parsedManifest.iterations || 300000, 
+                        parsedManifest.hashAlgorithm || 'SHA-256'
+                    );
+                    const originalName = new TextDecoder().decode(decryptedNameBytes);
+
+                    const decryptedTypeBytes = await decryptChunk(
+                        item.encryptedType.cipher,
+                        item.encryptedType.salt,
+                        item.encryptedType.iv,
+                        state.decPassphrase,
+                        parsedManifest.iterations || 300000, 
+                        parsedManifest.hashAlgorithm || 'SHA-256'
+                    );
+                    const originalType = new TextDecoder().decode(decryptedTypeBytes);
+
+                    const blob = new Blob([reconstructedBuffer], { type: originalType });
+                    const blobUrl = URL.createObjectURL(blob);
+                    state.blobUrls.push(blobUrl);
+
+                    reconstructedFiles.push({
+                        name: originalName,
+                        blob: blob,
+                        size: totalLength,
+                        type: originalType,
+                        blobUrl: blobUrl
+                    });
+                }
+
+                state.decodedFiles = reconstructedFiles;
+                state.decProgress = 100;
+                alert(`✅ Decryption complete! ${reconstructedFiles.length} files ready. Download now - data purges in 5 minutes!`);
+                startPurgeTimer();
+                startInactivityTimer();
+                renderDecoderPanel();
+            } catch (e) {
+                
+                let errorMessage = "Decryption failed: ";
+                if (e.message.includes("operation-specific reason") || e.name === "OperationError") {
+                    errorMessage += "Incorrect passphrase or corrupted data.";
+                } else if (e.message.includes("cancelled")) {
+                    errorMessage += "Operation was cancelled.";
+                } else {
+                    errorMessage += e.message;
+                }
+                
+                alert(`❌ ${errorMessage}`);
+            } finally {
+                state.isDecoding = false;
+                renderDecoderPanel();
+            }
+        }
+
+        async function triggerDownload(blob, filename) {
+            try {
+                if ('showSaveFilePicker' in window) {
+                    const handle = await window.showSaveFilePicker({
+                        suggestedName: filename,
+                        types: [{
+                            description: 'File',
+                            accept: { [blob.type]: [filename.substring(filename.lastIndexOf('.'))] },
+                        }],
+                    });
+                    const writable = await handle.createWritable();
+                    await writable.write(blob);
+                    await writable.close();
+                    resetInactivityTimer();
+                    return;
+                }
+            } catch (e) {
+                if (e.name === 'AbortError') {
+                    return;
+                } else {
+                }
+            }
+
+            // Fallback to anchor download
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            resetInactivityTimer();
+        }
+
+        window.downloadDecodedFile = async function(index) {
+            const file = state.decodedFiles[index];
+            await triggerDownload(file.blob, file.name);
+        }
+
+        window.toggleViewDecoded = async function(index) {
+            const file = state.decodedFiles[index];
+            if (!file.type.startsWith('text/')) return;
+
+            if (!state.viewedTexts[index]) {
+                state.viewedTexts[index] = { showing: false, text: null };
+            }
+
+            const view = state.viewedTexts[index];
+            view.showing = !view.showing;
+
+            if (view.showing && !view.text) {
+                view.text = await file.blob.text();
+            }
+
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        function startPurgeTimer() {
+            state.remainingTime = PURGE_DELAY;
+            state.sessionStartTime = performance.now();
+            updateCountdown();
+            state.purgeTimer = setInterval(() => {
+                const elapsed = (performance.now() - state.sessionStartTime) / 1000;
+                state.remainingTime = Math.max(0, PURGE_DELAY - Math.floor(elapsed));
+                updateCountdown();
+                if (state.remainingTime <= 0) {
+                    clearInterval(state.purgeTimer);
+                    state.purgeTimer = null;
+                    handleCleanup();
+                }
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            const countdownElement = document.getElementById('countdown');
+            if (countdownElement) {
+                countdownElement.textContent = state.remainingTime;
+                if (state.remainingTime <= 10) {
+                    countdownElement.classList.add('timer-red');
+                } else {
+                    countdownElement.classList.remove('timer-red');
+                }
+            }
+        }
+
+        function startInactivityTimer() {
+            resetInactivityTimer();
+            document.addEventListener('mousemove', resetInactivityTimer);
+            document.addEventListener('keydown', resetInactivityTimer);
+            document.addEventListener('click', resetInactivityTimer);
+            document.addEventListener('scroll', resetInactivityTimer);
+        }
+
+        function resetInactivityTimer() {
+            if (state.inactivityTimer) {
+                clearTimeout(state.inactivityTimer);
+            }
+            state.inactivityTimer = setTimeout(() => {
+                handleCleanup();
+                document.removeEventListener('mousemove', resetInactivityTimer);
+                document.removeEventListener('keydown', resetInactivityTimer);
+                document.removeEventListener('click', resetInactivityTimer);
+                document.removeEventListener('scroll', resetInactivityTimer);
+            }, INACTIVITY_TIMEOUT * 1000);
+        }
+
+        window.handleCleanup = function() {
+            if (state.decodedFiles.length > 0) {
+                if (!confirm("⚠️ Are you sure? All decrypted files will be permanently erased. Have you downloaded everything?")) {
+                    return;
+                }
+            }
+
+            cleanupBlobUrls();
+
+            if (state.encryptedChunksMap) {
+                state.encryptedChunksMap.clear();
+                state.encryptedChunksMap = null;
+            }
+
+            if (state.purgeTimer) {
+                clearInterval(state.purgeTimer);
+                state.purgeTimer = null;
+            }
+            if (state.inactivityTimer) {
+                clearTimeout(state.inactivityTimer);
+                state.inactivityTimer = null;
+            }
+
+            document.removeEventListener('mousemove', resetInactivityTimer);
+            document.removeEventListener('keydown', resetInactivityTimer);
+            document.removeEventListener('click', resetInactivityTimer);
+            document.removeEventListener('scroll', resetInactivityTimer);
+
+            state.manifest = null;
+            state.chunkBundle = null;
+            state.decodedFiles = [];
+            state.manifestInput = '';
+            state.chunkBundleInput = '';
+            state.manifestFile = null;
+            state.chunkBundleFile = null;
+            state.decPassphrase = '';
+            state.textInput = '';
+            state.files = [];
+            state.passphrase = '';
+            state.progress = 0;
+            state.decProgress = 0;
+            state.isEncoding = false;
+            state.isDecoding = false;
+            state.showManifestView = false;
+            state.showBundleView = false;
+            state.sessionStartTime = performance.now();
+            state.manifestValid = false;
+            state.manifestJson = '';
+            state.viewedTexts = {};
+            state.combinedFile = null;
+            state.combinedInput = '';
+
+            alert("✅ All data purged from memory.");
+            renderEncoderPanel();
+            renderDecoderPanel();
+        }
+
+        window.handleManifestChange = function(e) {
+            state.manifestInput = e.target.value;
+            state.manifestValid = false;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleChunkBundleChange = function(e) {
+            state.chunkBundleInput = e.target.value;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleCombinedChange = function(e) {
+            state.combinedInput = e.target.value;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleManifestFileChange = function(e) {
+            state.manifestFile = e.target.files[0];
+            state.manifestValid = false;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleChunkBundleFileChange = function(e) {
+            state.chunkBundleFile = e.target.files[0];
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleCombinedFileChange = function(e) {
+            state.combinedFile = e.target.files[0];
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.removeManifestFile = function() {
+            state.manifestFile = null;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.removeChunkBundleFile = function() {
+            state.chunkBundleFile = null;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.removeCombinedFile = function() {
+            state.combinedFile = null;
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.handleIterationsChange = function(e) {
+            state.iterations = parseInt(e.target.value) || 300000;
+            resetInactivityTimer();
+        }
+
+        window.handleHashAlgorithmChange = function(e) {
+            state.hashAlgorithm = e.target.value;
+            resetInactivityTimer();
+        }
+
+        window.handleAutoDownloadBundleChange = function(e) {
+            state.autoDownloadBundle = e.target.checked;
+            resetInactivityTimer();
+        }
+
+        window.handleAutoDownloadManifestChange = function(e) {
+            state.autoDownloadManifest = e.target.checked;
+            resetInactivityTimer();
+        }
+
+        window.handleCombineOutputChange = function(e) {
+            state.combineOutput = e.target.checked;
+            resetInactivityTimer();
+        }
+
+        window.handleDecPassphraseChange = function(e) {
+            state.decPassphrase = e.target.value;
+            resetInactivityTimer();
+        }
+
+        window.cancelOperation = function() {
+            state.isEncoding = false;
+            state.isDecoding = false;
+            state.progress = 0;
+            state.decProgress = 0;
+            alert("⚠️ Operation cancelled");
+            renderEncoderPanel();
+            renderDecoderPanel();
+            resetInactivityTimer();
+        }
+
+        window.setActiveTab = function(tabId) {
+            state.activeTab = tabId;
+            renderInstructionsContent();
+            resetInactivityTimer();
+        }
+
+        function getTabContent(tabId) {
+            switch (tabId) {
+                case 'overview':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🔐 What is ZeroDeadDrop?</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <p class="text-lg mb-3" style="color: var(--text-color);">
+                                    <strong>Simple Explanation:</strong> ZeroDeadDrop encrypts your files entirely in your browser using military-grade encryption (AES-256-GCM). 
+                                    It creates three separate pieces: encrypted data, instructions, and a password. All three are needed to decrypt.
+                                </p>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🔑 Three-Component Security Architecture</div>
+                            
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #3b82f6;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🗃️</div>
+                                    <h5 class="font-bold mb-2">1. Encrypted Bundle</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">Your data scrambled with AES-256-GCM encryption (.json file)</p>
+                                </div>
+                                <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #14b8a6;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">📋</div>
+                                    <h5 class="font-bold mb-2">2. Manifest</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">Instructions on how to reassemble the encrypted data</p>
+                                </div>
+                                <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #ef4444;">
+                                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔑</div>
+                                    <h5 class="font-bold mb-2">3. Passphrase</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">Your secret password that unlocks everything</p>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                <p class="text-center font-bold" style="color: #ffffff;">⚠️ CRITICAL: You need ALL THREE pieces. Lose any one = lose your data permanently.</p>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🚫 What "Zero" Means</div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                    <div class="font-bold mb-2">🌐 Zero Servers</div>
+                                    <p class="text-sm" style="color: var(--text-muted);">Everything happens in your browser. No backend, no cloud, no uploads. This HTML file is the entire application.</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                    <div class="font-bold mb-2">🙈 Zero Knowledge</div>
+                                    <p class="text-sm" style="color: var(--text-muted);">Developers literally cannot access your data. There's no backend to access, no logs, nothing.</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                    <div class="font-bold mb-2">📊 Zero Data Collection</div>
+                                    <p class="text-sm" style="color: var(--text-muted);">No analytics, cookies, or telemetry. ZeroDeadDrop doesn't know who uses this or what you encrypt.</p>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                    <div class="font-bold mb-2">📦 Zero Dependencies</div>
+                                    <p class="text-sm" style="color: var(--text-muted);">One self-contained HTML file. No external libraries or frameworks. Works offline.</p>
+                                </div>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🛡️ Encryption Details</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h6 class="font-bold mb-2">Technical Specifications:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                    <li><strong>AES-256-GCM:</strong> 256-bit Advanced Encryption Standard in Galois/Counter Mode</li>
+                                    <li><strong>PBKDF2:</strong> Password-Based Key Derivation Function 2 with 300,000+ iterations</li>
+                                    <li><strong>SHA-256/512:</strong> Secure hash algorithms for key derivation</li>
+                                    <li><strong>Random Salts:</strong> Unique 16-byte salt per encryption prevents rainbow table attacks</li>
+                                    <li><strong>Random IVs:</strong> Unique 12-byte initialization vector per chunk</li>
+                                    <li><strong>Web Crypto API:</strong> Browser's native cryptography (not JavaScript implementations)</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🌐 Works Completely Offline</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <h6 class="font-bold mb-2" style="color: var(--text-color);">No Internet Required:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li>Save this HTML file to your computer</li>
+                                    <li>Open with any modern browser - works without internet</li>
+                                    <li>Encrypt and decrypt files on air-gapped systems</li>
+                                    <li>Perfect for maximum security environments</li>
+                                    <li>Share this HTML file itself for secure communication</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'sender-guide':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">📤 How to Send Files Securely</div>
+                            
+                            <div class="text-lg font-bold mb-4">📝 Step-by-Step Instructions</div>
+                            
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #14b8a6;">
+                                <h4 class="font-bold mb-3">Step 1: Add Your Data</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>Text:</strong> Type or paste secure messages in the text area (up to 1 million characters)</li>
+                                    <li><strong>Files:</strong> Click "Choose Files" and select documents, images, videos, etc.</li>
+                                    <li><strong>Size Limit:</strong> Total combined size must be under 1GB. May lag for slow browsers or freeze for higher sizes.</li>
+                                    <li><strong>Review:</strong> Check the "Data Payload" section to see what will be encrypted</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #3b82f6;">
+                                <h4 class="font-bold mb-3">Step 2: Create a Strong Passphrase</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>Minimum 8 characters</strong> (but 16+ is strongly recommended)</li>
+                                    <li><strong>Use a mix:</strong> Upper/lower case, numbers, symbols</li>
+                                    <li><strong>Make it memorable:</strong> "@KS@VeSCWSdGFyHSkKOGJVvMEvME" is better than "aB3$xM9z"</li>
+                                    <li><strong>Click eye icon (👁️)</strong> to show/hide password while typing</li>
+                                    <li><strong>Use "Generate Passphrase"</strong> button for a cryptographically random one</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #22c55e;">
+                                <h4 class="font-bold mb-3">Step 3: Configure Settings (Optional)</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>PBKDF2 Iterations:</strong> Higher = more secure but slower (300,000 is recommended)</li>
+                                    <li><strong>Hash Algorithm:</strong> SHA-256 (faster) or SHA-512 (more secure)</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #a855f7;">
+                                <h4 class="font-bold mb-3">Step 4: Encrypt</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li>Click <strong>"START ENCRYPTION"</strong> button</li>
+                                    <li>Wait for progress bar to complete (may take time for large files)</li>
+                                    <li>Depending on your settings, files may auto-download (bundle, manifest, or combined).</li>
+                                    <li>View, copy, or manually download the manifest, bundle, and combined (if enabled) from the results section.</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🚚 How to Send the Three Pieces</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                <h4 class="font-bold mb-3" style="color: var(--text-color);">🔥 CRITICAL SECURITY RULE</h4>
+                                <p class="text-sm font-bold mb-2" style="color: var(--text-color);">NEVER send the passphrase through the same channel as the manifest or encrypted file!</p>
+                                <p class="text-sm" style="color: var(--text-color);">If someone intercepts one communication channel, they should only get one piece (useless alone).</p>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4 mt-4">
+                                <div class="p-4 rounded-xl" style="background: var(--success-bg); border: 2px solid var(--success-border);">
+                                    <h5 class="font-bold mb-2" style="color: var(--text-color);">🗃️ Encrypted File</h5>
+                                    <p class="text-sm mb-2" style="color: var(--text-color);"><strong>Send via:</strong></p>
+                                    <ul class="text-xs space-y-1" style="color: var(--text-color);">
+                                        <li>✅ Email attachment</li>
+                                        <li>✅ Cloud storage (Dropbox, Drive)</li>
+                                        <li>✅ File sharing sites</li>
+                                        <li>✅ USB drive</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <h5 class="font-bold mb-2" style="color: var(--text-color);">📋 Manifest</h5>
+                                    <p class="text-sm mb-2" style="color: var(--text-color);"><strong>Send via:</strong></p>
+                                    <ul class="text-xs space-y-1" style="color: var(--text-color);">
+                                        <li>✅ Different email</li>
+                                        <li>✅ Text message</li>
+                                        <li>✅ Messaging app</li>
+                                        <li>✅ Social media DM</li>
+                                    </ul>
+                                </div>
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <h5 class="font-bold mb-2" style="color: var(--text-color);">🔑 Passphrase</h5>
+                                    <p class="text-sm mb-2" style="color: var(--text-color);"><strong>Send via SECURE channel:</strong></p>
+                                    <ul class="text-xs space-y-1" style="color: var(--text-color);">
+                                        <li>🏆 Voice call</li>
+                                        <li>🏆 Signal/encrypted chat</li>
+                                        <li>🏆 In-person</li>
+                                        <li>⚠️ Never same as file/manifest</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-xl mt-4" style="background: var(--list-bg);">
+                                <h6 class="font-bold mb-2">💡 Recommended Strategy:</h6>
+                                <ol class="list-decimal pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>Day 1:</strong> Email the encrypted .json file</li>
+                                    <li><strong>Day 2:</strong> Send manifest via text message or different email</li>
+                                    <li><strong>Day 3:</strong> Call them and verbally share the passphrase</li>
+                                </ol>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🌐 Offline Security</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <h6 class="font-bold mb-2" style="color: var(--text-color);">Maximum Security Setup:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li>Download this HTML file to an air-gapped computer</li>
+                                    <li>Disconnect from internet before opening</li>
+                                    <li>Encrypt your files offline</li>
+                                    <li>Transfer encrypted bundle via USB to connected computer</li>
+                                    <li>Send via normal channels - data is already encrypted</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'receiver-guide':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">📥 How to Receive Files Securely</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <p class="text-lg" style="color: var(--text-color);">
+                                    <strong>Overview:</strong> You've received three pieces through different channels. 
+                                    Collect all three, then use this app to decrypt and download your files.
+                                </p>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">📋 What You Should Have</div>
+                            
+                            <div class="grid grid-cols-3 gap-4 mb-6">
+                                <div class="p-4 rounded-xl text-center" style="background: var(--list-bg); border: 2px solid #3b82f6;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
+                                    <h5 class="font-bold mb-2">Encrypted File</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">A .json file (e.g., "zd_bundle_X7p9qW3r.json")</p>
+                                </div>
+                                <div class="p-4 rounded-xl text-center" style="background: var(--list-bg); border: 2px solid #14b8a6;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📋</div>
+                                    <h5 class="font-bold mb-2">Manifest Text</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">Long text starting with { and ending with }</p>
+                                </div>
+                                <div class="p-4 rounded-xl text-center" style="background: var(--list-bg); border: 2px solid #ef4444;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔑</div>
+                                    <h5 class="font-bold mb-2">Passphrase</h5>
+                                    <p class="text-sm" style="color: var(--text-muted);">Secret password from sender</p>
+                                </div>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🔓 Decryption Steps</div>
+                            
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #3b82f6;">
+                                <h4 class="font-bold mb-3">Step 0: Import Combined (if available)</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li>If the sender provided a combined JSON file containing both manifest and bundle, upload or paste it in the Combined section.</li>
+                                    <li>Click <strong>"Import Combined"</strong>. This imports both at once - you don't need to use the separate bundle and manifest sections.</li>
+                                    <li>If successful, proceed to Step 3.</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #3b82f6;">
+                                <h4 class="font-bold mb-3">Step 1: Import the Encrypted Bundle</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>Option A:</strong> Click "Upload Bundle File" and select the .json file</li>
+                                    <li><strong>Option B:</strong> Open the .json in a text editor, copy everything, paste in the text box</li>
+                                    <li>Click <strong>"Import Bundle"</strong> button</li>
+                                    <li>You'll see "✅ Imported X chunks" when successful</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #14b8a6;">
+                                <h4 class="font-bold mb-3">Step 2: Import the Manifest</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li><strong>Option A:</strong> Click "Upload Manifest File" and select the .json file</li>
+                                    <li><strong>Option B:</strong> Copy the <strong>entire manifest text</strong> (including { } brackets), paste into the "Manifest" text box</li>
+                                    <li>Click <strong>"Import Manifest"</strong> button</li>
+                                    <li>You'll see "✅ Manifest imported" when successful</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #ef4444;">
+                                <h4 class="font-bold mb-3">Step 3: Enter the Passphrase</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li>Type the <strong>exact passphrase</strong> - every character must be perfect</li>
+                                    <li>Passwords are case-sensitive: "Password123" ≠ "password123"</li>
+                                    <li>Include all spaces, punctuation, special characters</li>
+                                    <li>Click eye icon (👁️) to show/hide while typing</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl border-l-4" style="background: var(--list-bg); border-left-color: #a855f7;">
+                                <h4 class="font-bold mb-3">Step 4: Decrypt and Download</h4>
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                    <li>Click <strong>"START DECRYPTION"</strong></li>
+                                    <li>Wait for progress bar (may take time for large files)</li>
+                                    <li>Files appear in "Decoded Files" section</li>
+                                    <li><strong>Download immediately!</strong> Files only exist in browser memory</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🚨 Troubleshooting</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h6 class="font-bold mb-2">❌ "Decryption failed"</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                    <li>Double-check passphrase - every character must be exact</li>
+                                    <li>Verify manifest is complete (starts { ends })</li>
+                                    <li>Ensure encrypted file imported successfully</li>
+                                    <li>Contact sender to verify all three pieces</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl mt-2" style="background: var(--list-bg);">
+                                <h6 class="font-bold mb-2">❌ "Chunk not found"</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                    <li>Import the encrypted bundle BEFORE attempting decryption</li>
+                                    <li>Make sure you're using the correct .json file</li>
+                                    <li>Try refreshing page and importing again</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl mt-4" style="background: var(--success-bg); border: 2px solid var(--success-border);">
+                                <h6 class="font-bold mb-2" style="color: var(--text-color);">After Successful Decryption:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li><strong>Download all files immediately</strong></li>
+                                    <li>The app auto-purges data after 300 seconds of session time or inactivity to maintain security.</li>
+                                    <li><strong>Click "Purge Now"</strong> to clear browser memory</li>
+                                    <li><strong>Close browser tab</strong> when finished</li>
+                                    <li>Consider restarting device to clear RAM</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">🌐 Offline Decryption</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <h6 class="font-bold mb-2" style="color: var(--text-color);">Maximum Security Setup:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li>Transfer this HTML file and encrypted bundle to air-gapped computer</li>
+                                    <li>Disconnect from internet before opening</li>
+                                    <li>Decrypt your files offline</li>
+                                    <li>No network access means zero chance of data leakage</li>
+                                    <li>Files never leave your isolated environment</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+
+                case 'encryption-process':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🔒 How Encryption Works</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <p class="text-lg mb-3" style="color: var(--text-color);">
+                                    <strong>Overview:</strong> ZeroDeadDrop uses client-side encryption to secure your data. Here's a step-by-step explanation of the process.
+                                </p>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">1. Data Preparation</div>
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-color);">
+                                    <li>Your files or text are loaded into the browser memory.</li>
+                                    <li>Large files are split into 2MB chunks for efficient processing.</li>
+                                    <li>Each chunk is handled independently to ensure security.</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">2. Key Derivation</div>
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-color);">
+                                    <li>The passphrase you provide is used to derive a strong encryption key.</li>
+                                    <li>Using PBKDF2 with 300,000 iterations and SHA-256 hash.</li>
+                                    <li>A unique salt is generated for each encryption operation to prevent rainbow table attacks.</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">3. Encryption</div>
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-color);">
+                                    <li>Each 2MB chunk is encrypted using AES-256-GCM.</li>
+                                    <li>A unique initialization vector (IV) is generated for each chunk.</li>
+                                    <li>File names and types are also encrypted separately using the same method.</li>
+                                    <li>All encryption happens in your browser using the Web Crypto API—no data leaves your device unencrypted.</li>
+                                    <li>Note: Different browsers have varying memory limits; large files (>500MB) may cause crashes on low-end devices.</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">4. Output Generation</div>
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-color);">
+                                    <li><strong>Chunk Bundle:</strong> Contains all encrypted chunks with their IDs, salts, and IVs.</li>
+                                    <li><strong>Manifest:</strong> Contains metadata like chunk IDs, encrypted file names/types, and reassembly instructions.</li>
+                                    <li>The passphrase remains separate and must be shared securely.</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">5. Decryption Process</div>
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <ul class="list-disc pl-6 text-sm space-y-2" style="color: var(--text-color);">
+                                    <li>Reverses the encryption: Uses passphrase to decrypt chunks, names, and types.</li>
+                                    <li>Reassembles chunks into original files using manifest instructions.</li>
+                                    <li>All decryption also happens client-side in the browser.</li>
+                                </ul>
+                            </div>
+
+                            <div class="p-4 rounded-xl" style="background: var(--success-bg); border: 2px solid var(--success-border);">
+                                <p class="text-center font-bold" style="color: #ffffff;">This design ensures that even if one component is compromised, your data remains secure without all three pieces.</p>
+                            </div>
+                        </div>
+                    `;
+
+                case 'security':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🛡️ Security Architecture & Honest Limitations</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                <h4 class="font-bold mb-2" style="color: var(--text-color);">⚠️ IMPORTANT: This Software is NOT Audited</h4>
+                                <p class="text-sm" style="color: var(--text-color);">
+                                    While this app uses industry-standard cryptography (Web Crypto API), it has NOT been professionally audited by security experts. 
+                                    Implementation bugs may exist. Use ONLY for non-critical data.
+                                </p>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">✅ What We Do Well</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--success-bg); border: 2px solid var(--success-border);">
+                                <h6 class="font-bold mb-3" style="color: var(--text-color);">Cryptographic Implementation:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li><strong>AES-256-GCM:</strong> Industry standard, used by governments/militaries worldwide</li>
+                                    <li><strong>Web Crypto API:</strong> Native browser cryptography (not JavaScript implementation)</li>
+                                    <li><strong>PBKDF2 with 300k+ iterations:</strong> Makes brute-force attacks computationally expensive</li>
+                                    <li><strong>Random salts & IVs:</strong> Unique per encryption, prevents pattern analysis</li>
+                                    <li><strong>No external code:</strong> Zero dependencies</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">❌ Honest Limitations</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                <h6 class="font-bold mb-3" style="color: var(--text-color);">Known Weaknesses:</h6>
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li>No forward secrecy - passphrase compromise exposes all data</li>
+                                    <li>Data resides in browser memory during operations</li>
+                                    <li>No additional authentication for manifest integrity</li>
+                                    <li>All items share the same passphrase</li>
+                                    <li>Code not independently audited</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-lg font-bold mb-4">📚 Recommendations</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                    <li>Use strong, unique passphrases</li>
+                                    <li>Run on trusted devices only</li>
+                                    <li>Clear browser cache after use</li>
+                                    <li>For critical data, use audited tools like GPG or VeraCrypt</li>
+                                    <li>Verify code source and integrity</li>
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                case 'legal':
+                    return `
+                        <div class="space-y-6">
+                            <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">📄 Legal & Documentation</div>
+                            
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h3 class="font-bold mb-4">LICENSE</h3>
+                                <pre>${`ZeroDeadDrop Software License v1.0
+© 2025 ZeroDeadDrop (a project by Tuyen Evans)
+All rights reserved.
+
+1. Grant of Use
+You are hereby granted a limited, non-exclusive, non-transferable, revocable license
+to use the ZeroDeadDrop software ("the Software") privately and lawfully for personal,
+educational, or internal research purposes only.
+
+2. Restrictions
+- You may not sell, sublicense, rent, distribute, modify, or publicly share the Software
+  or any derivative works without prior written consent from the copyright holder.
+- You may not use, reproduce, or adapt the ZeroDeadDrop name, logo, or branding in any
+  derivative product without explicit permission.
+- You must not use the Software for any unlawful activity, including but not limited to:
+  data theft, hacking, terrorism, exploitation, harassment, or the storage or transmission
+  of illegal or prohibited content.
+
+3. Compliance and Jurisdiction
+You are solely responsible for determining whether the use of cryptography or the Software
+is legal in your jurisdiction and for complying with all applicable laws and regulations,
+including export controls or encryption restrictions. Use of the Software in violation of
+local laws is strictly prohibited.
+
+4. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED “AS IS,” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO WARRANTIES of MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+AND NON-INFRINGEMENT. THE COPYRIGHT HOLDER DOES NOT GUARANTEE THAT THE SOFTWARE IS ERROR-FREE,
+SECURE, OR SUITABLE FOR ANY SPECIFIC PURPOSE.
+
+5. Limitation of Liability
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR ITS USE.
+
+6. Revocation
+The copyright holder reserves the right to revoke this license at any time and for any
+reason. Continued use of the Software after revocation is prohibited.
+
+7. Attribution
+If you reference or demonstrate the Software publicly, you must include the following credit:
+"Based on ZeroDeadDrop by Tuyen Evans."
+
+8. Governing Law
+This License shall be governed by and construed in accordance with the laws of the United
+States and the State of South Dakota, without regard to its conflict of law principles.
+
+End of License.`}</pre>
+                            </div>
+
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h3 class="font-bold mb-4">README.md</h3>
+                                <pre>${`# ZeroDeadDrop v1.0.0
+
+**Stateless, zero-dependency, zero-server, offline AES-256-GCM encryption system.**
+
+## Overview
+ZeroDeadDrop is a browser-based encryption utility that operates fully offline.  
+It performs AES-256-GCM encryption and decryption entirely within the browser,  
+requiring no internet connection, no servers, and no external libraries.
+
+The app is designed for ephemeral, private use — all data resides in memory only  
+and self-erases after expiration or inactivity. It is compatible with Tor Browser  
+and all major desktop browsers.
+
+## Features
+- 🔒 AES-256-GCM encryption using PBKDF2-SHA256 key derivation
+- 🧱 Stateless, zero-server architecture
+- 🕳️ Fully offline operation (no telemetry, no tracking, no requests)
+- ⏱️ Time-based and inactivity-based auto-purge
+- 🧩 Manifest + bundle system for chunked file encryption
+- ⚙️ Browser-native Web Crypto API (no dependencies)
+- 🕵️ CSP-hardened for zero data exfiltration
+- 🌀 Works in Tor Browser (Standard & Safer modes)
+
+## Usage
+1. Open the HTML file in your browser (no installation needed).
+2. Choose files or enter text to encrypt.
+3. Set a passphrase and encrypt.
+4. Download or copy the encrypted manifest and bundle.
+5. To decrypt, reload the app offline and supply the same inputs.
+
+⚠️ **Important:**  
+ZeroDeadDrop is stateless. Once you close or reload the page, all session data is erased.
+
+## Security
+- AES-256-GCM with random salt and IV per chunk
+- PBKDF2-SHA256 with 300,000 iterations
+- Secure RNG via \`crypto.getRandomValues()\`
+- No \`localStorage\`, \`sessionStorage\`, cookies, or network calls
+- Strict CSP: \`default-src 'none'\`
+- Optional monotonic (\`performance.now()\`) timers for tamper-proof expiration
+
+## Disclaimer
+ZeroDeadDrop is provided “as is,” with no warranty or guarantee of any kind.  
+Use responsibly and in compliance with your local laws.
+
+## Copyright & License
+© 2025 ZeroDeadDrop (a project by Tuyen Evans)  
+Licensed under the **ZeroDeadDrop Software License v1.0** (see LICENSE).
+
+## Contact
+For licensing or commercial use requests, contact:  
+📧 **ZeroDeadDrop@gmail.com**`}</pre>
+                            </div>
+
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h3 class="font-bold mb-4">PRIVACY.md</h3>
+                                <pre>${`# ZeroDeadDrop Privacy Policy
+
+Effective Date: October 2025  
+Copyright © 2025 ZeroDeadDrop (a project by Tuyen Evans)
+
+## Data Collection
+ZeroDeadDrop collects **no personal data**.  
+The app performs all operations locally in your browser — it does not send, receive,  
+or store any data on external servers.
+
+- No cookies  
+- No analytics  
+- No telemetry  
+- No tracking pixels  
+- No external resources or scripts
+
+## Storage
+All data (files, text, passphrases, manifests) exists **only in RAM** and is erased  
+automatically when the tab is closed, reloaded, or when the expiration timer triggers.
+
+## Encryption
+All encryption and decryption occur locally using the browser’s native Web Crypto API.  
+The app does not transmit or log encryption keys, salts, IVs, or any ciphertext.
+
+## Jurisdiction & Responsibility
+Users are responsible for ensuring that encryption technology is legal in their jurisdiction.  
+ZeroDeadDrop disclaims responsibility for any misuse or illegal activity conducted with the app.
+
+## Contact
+For privacy inquiries:  
+**ZeroDeadDrop@gmail.com**`}</pre>
+                            </div>
+
+                            <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                <h3 class="font-bold mb-4">COPYRIGHT</h3>
+                                <pre>${`© 2025 ZeroDeadDrop (a project by Tuyen Evans)
+All rights reserved.
+
+This software, including its design, layout, and source code, is protected by copyright law.
+Unauthorized redistribution, modification, or commercial use without written permission
+is strictly prohibited.`}</pre>
+                            </div>
+                        </div>
+                    `;
+            }
+        }
+
+        function renderInstructionsContent() {
+            const contentDiv = document.getElementById('instructionsContent');
+            if (!contentDiv) return;
+
+            const tabs = [
+                { id: 'overview', label: 'Overview' },
+                { id: 'sender-guide', label: 'Sender Guide' },
+                { id: 'receiver-guide', label: 'Receiver Guide' },
+                { id: 'encryption-process', label: 'Encryption Process' },
+                { id: 'security', label: 'Security' },
+                { id: 'legal', label: 'Legal' }
+            ];
+
+            let html = '<div class="tab-nav">';
+            tabs.forEach(tab => {
+                html += `<button class="tab-button ${state.activeTab === tab.id ? 'active' : ''}" onclick="setActiveTab('${tab.id}')">${tab.label}</button>`;
+            });
+            html += '</div>';
+
+            html += getTabContent(state.activeTab);
+
+            contentDiv.innerHTML = html;
+        }
+
+        function renderEncoderPanel() {
+            const encoder = document.getElementById('encoder');
+            if (!encoder) return;
+
+            let html = `<h2 class="text-lg font-bold mb-4">Encrypt Data</h2>`;
+            html += `<div class="space-y-4">`;
+            html += `<textarea class="input-text-area" placeholder="Enter text to encrypt (optional)" oninput="handleTextChange(event)" rows="5">${state.textInput}</textarea>`;
+            html += `<p id="charCount" class="text-sm text-muted">Characters: ${state.textInput.length.toLocaleString()} / ${MAX_TEXT_LENGTH.toLocaleString()}</p>`;
+            html += `<button class="button-primary" onclick="clearTextInput()">Clear Text</button>`;
+            html += `<label for="file-upload" class="button-primary w-full">Choose Files</label>`;
+            html += `<input type="file" id="file-upload" multiple onchange="handleFileChange(event)" style="display: none;">`;
+            html += `<div class="space-y-2">`;
+            state.files.forEach((file, index) => {
+                html += `<div class="list-item">
+                    <span>${escapeHtml(file.name)} (${formatBytes(file.size)})</span>
+                    <button onclick="removeFile(${index})">Remove</button>
+                </div>`;
+            });
+            html += `</div>`;
+            html += `<div class="flex items-center space-x-2 passphrase-container">
+                <input type="${state.showPassphrase ? 'text' : 'password'}" class="input-text-area" value="${state.passphrase}" placeholder="Passphrase (min 8 chars)" oninput="state.passphrase = this.value">
+                <button class="button-primary" onclick="togglePassphraseVisibility()">${state.showPassphrase ? 'Hide' : 'Show'}</button>
+                <button class="button-primary" onclick="generatePassphrase()">Generate</button>
+            </div>`;
+            if (state.showAdvancedSettings) {
+                html += `<select class="input-text-area" onchange="handleHashAlgorithmChange(event)">
+                    <option value="SHA-256" ${state.hashAlgorithm === 'SHA-256' ? 'selected' : ''}>SHA-256</option>
+                    <option value="SHA-512" ${state.hashAlgorithm === 'SHA-512' ? 'selected' : ''}>SHA-512</option>
+                </select>`;
+                html += `<input type="number" class="input-text-area" value="${state.iterations}" placeholder="PBKDF2 Iterations" onchange="handleIterationsChange(event)">`;
+            }
+            html += `<button class="button-primary" onclick="toggleAdvancedSettings()">${state.showAdvancedSettings ? 'Hide' : 'Show'} Advanced</button>`;
+            html += `<div class="checkbox-option">
+                <input type="checkbox" ${state.autoDownloadBundle ? 'checked' : ''} onchange="handleAutoDownloadBundleChange(event)">
+                <label>Auto Download Bundle</label>
+            </div>`;
+            html += `<div class="checkbox-option">
+                <input type="checkbox" ${state.autoDownloadManifest ? 'checked' : ''} onchange="handleAutoDownloadManifestChange(event)">
+                <label>Auto Download Manifest</label>
+            </div>`;
+            html += `<div class="checkbox-option">
+                <input type="checkbox" ${state.combineOutput ? 'checked' : ''} onchange="handleCombineOutputChange(event)">
+                <label>Combine Manifest and Bundle</label>
+            </div>`;
+            html += `<button class="button-primary w-full" onclick="handleEncode()" ${state.isEncoding ? 'disabled' : ''}>Start Encryption</button>`;
+            if (state.isEncoding) {
+                html += `<div class="flex items-center">
+                    <div class="loading-spinner"></div>
+                    <span>Encrypting...</span>
+                </div>`;
+                html += `<div style="background: var(--border-color); height: 6px; border-radius: 3px;">
+                    <div class="progress-bar" style="width: ${state.progress}%"></div>
+                </div>`;
+                html += `<button class="button-primary" onclick="cancelOperation()">Cancel</button>`;
+            }
+            if (state.manifest && state.chunkBundle) {
+                if (state.manifest) {
+                    html += `<h3 class="font-bold mt-4">Manifest</h3>`;
+                    if (state.showManifestView) {
+                        html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${JSON.stringify(state.manifest, null, 2)}</pre>`;
+                    }
+                    html += `<button class="button-primary" onclick="toggleManifestView()">${state.showManifestView ? 'Hide' : 'View'}</button>`;
+                    html += `<button class="button-primary" onclick="copyManifest()">Copy</button>`;
+                    html += `<button class="button-primary" onclick="downloadManifest()">Download</button>`;
+                }
+                if (state.chunkBundle) {
+                    html += `<h3 class="font-bold mt-4">Bundle</h3>`;
+                    if (state.showBundleView) {
+                        html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${JSON.stringify(state.chunkBundle, null, 2)}</pre>`;
+                    }
+                    html += `<button class="button-primary" onclick="toggleBundleView()">${state.showBundleView ? 'Hide' : 'View'}</button>`;
+                    html += `<button class="button-primary" onclick="copyBundle()">Copy</button>`;
+                    html += `<button class="button-primary" onclick="downloadBundle()">Download</button>`;
+                }
+                if (state.combineOutput) {
+                    html += `<h3 class="font-bold mt-4">Combined</h3>`;
+                    if (state.showCombinedView) {
+                        const combined = {manifest: state.manifest, bundle: state.chunkBundle};
+                        html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${JSON.stringify(combined, null, 2)}</pre>`;
+                    }
+                    html += `<button class="button-primary" onclick="toggleCombinedView()">${state.showCombinedView ? 'Hide' : 'View'}</button>`;
+                    html += `<button class="button-primary" onclick="copyCombined()">Copy</button>`;
+                    html += `<button class="button-primary" onclick="downloadCombined()">Download</button>`;
+                }
+            }
+            html += `</div>`;
+
+            encoder.innerHTML = html;
+        }
+
+        function renderDecoderPanel() {
+            const decoder = document.getElementById('decoder');
+            if (!decoder) return;
+
+            let html = `<h2 class="text-lg font-bold mb-4">Decrypt Data</h2>`;
+            html += `<div class="space-y-4">`;
+            html += `<h3 class="font-bold">Combined (Optional)</h3>`;
+            html += `<label for="combined-upload" class="button-primary w-full">Upload Combined File</label>`;
+            html += `<input type="file" id="combined-upload" onchange="handleCombinedFileChange(event)" style="display: none;">`;
+            if (state.combinedFile) {
+                html += `<div class="list-item">
+                    <span>${escapeHtml(state.combinedFile.name)}</span>
+                    <button onclick="removeCombinedFile()">Remove</button>
+                </div>`;
+            }
+            html += `<textarea class="input-text-area" placeholder="Or paste combined JSON" oninput="handleCombinedChange(event)" rows="5">${state.combinedInput}</textarea>`;
+            html += `<button class="button-primary" onclick="importCombined()">Import Combined</button>`;
+            html += `<h3 class="font-bold">Chunk Bundle</h3>`;
+            html += `<label for="bundle-upload" class="button-primary w-full">Upload Bundle File</label>`;
+            html += `<input type="file" id="bundle-upload" onchange="handleChunkBundleFileChange(event)" style="display: none;">`;
+            if (state.chunkBundleFile) {
+                html += `<div class="list-item">
+                    <span>${escapeHtml(state.chunkBundleFile.name)}</span>
+                    <button onclick="removeChunkBundleFile()">Remove</button>
+                </div>`;
+            }
+            html += `<textarea class="input-text-area" placeholder="Or paste bundle JSON" oninput="handleChunkBundleChange(event)" rows="5">${state.chunkBundleInput}</textarea>`;
+            html += `<button class="button-primary" onclick="importChunkBundle()">Import Bundle</button>`;
+            if (state.encryptedChunksMap) {
+                html += `<p class="text-success">✅ Imported ${state.encryptedChunksMap.size} chunks</p>`;
+            }
+            html += `<h3 class="font-bold">Manifest</h3>`;
+            html += `<label for="manifest-upload" class="button-primary w-full">Upload Manifest File</label>`;
+            html += `<input type="file" id="manifest-upload" onchange="handleManifestFileChange(event)" style="display: none;">`;
+            if (state.manifestFile) {
+                html += `<div class="list-item">
+                    <span>${escapeHtml(state.manifestFile.name)}</span>
+                    <button onclick="removeManifestFile()">Remove</button>
+                </div>`;
+            }
+            html += `<textarea class="input-text-area" placeholder="Paste manifest JSON" oninput="handleManifestChange(event)" rows="5">${state.manifestInput}</textarea>`;
+            html += `<button class="button-primary" onclick="importManifest()">Import Manifest</button>`;
+            if (state.manifestValid) {
+                html += `<p class="text-success">✅ Manifest imported</p>`;
+            }
+            html += `<div class="flex items-center space-x-2 passphrase-container">
+                <input type="${state.showDecPassphrase ? 'text' : 'password'}" class="input-text-area" value="${state.decPassphrase}" placeholder="Passphrase" oninput="handleDecPassphraseChange(event)">
+                <button class="button-primary" onclick="toggleDecPassphraseVisibility()">${state.showDecPassphrase ? 'Hide' : 'Show'}</button>
+            </div>`;
+            html += `<button class="button-primary w-full" onclick="handleDecode()" ${state.isDecoding ? 'disabled' : ''}>Start Decryption</button>`;
+            if (state.isDecoding) {
+                html += `<div class="flex items-center">
+                    <div class="loading-spinner"></div>
+                    <span>Decrypting...</span>
+                </div>`;
+                html += `<div style="background: var(--border-color); height: 6px; border-radius: 3px;">
+                    <div class="progress-bar" style="width: ${state.decProgress}%"></div>
+                </div>`;
+                html += `<button class="button-primary" onclick="cancelOperation()">Cancel</button>`;
+            }
+            if (state.decodedFiles.length > 0) {
+                html += `<h3 class="font-bold mt-4">Decoded Files</h3>`;
+                state.decodedFiles.forEach((file, index) => {
+                    html += `<div class="list-item">
+                        <span>${escapeHtml(file.name)} (${formatBytes(file.size)})</span>
+                        <button class="button-primary" onclick="downloadDecodedFile(${index})">Download</button>`;
+                    if (file.type.startsWith('text/')) {
+                        html += `<button class="button-primary" onclick="toggleViewDecoded(${index})">${state.viewedTexts[index]?.showing ? 'Hide' : 'View'}</button>`;
+                    }
+                    html += `</div>`;
+                    if (state.viewedTexts[index]?.showing) {
+                        html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${state.viewedTexts[index].text}</pre>`;
+                    }
+                });
+                html += `<p class="text-sm">Purge in <span id="countdown">${state.remainingTime}</span> seconds</p>`;
+                html += `<button class="button-primary" onclick="handleCleanup()">Purge Now</button>`;
+            }
+            html += `</div>`;
+
+            decoder.innerHTML = html;
+            if (state.decodedFiles.length > 0) {
+                updateCountdown();
+            }
+        }
+
+        function initApp() {
+            const root = document.getElementById('root');
+            root.innerHTML = `
+                <div class="container">
+                    <div class="warning-banner">⚠️ Warning: This application has NOT been professionally audited. Use for non-critical data only.</div>
+                    <div class="warning-banner">⚠️ Warning: Do not input information you find in the decoding/decryption section unless you are 100% aware and trusting of the source to know what it contains.</div>
+                    <h1 class="hero-title text-4xl">ZeroDeadDrop</h1>
+                    <p class="tagline">A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data, Enabling Secure Offline Data Sharing Without Internet or Cellular Connectivity</p>
+                    <div class="flex justify-center space-x-4 mb-4">
+                        <button class="button-primary" onclick="toggleInstructions()">Instructions</button>
+                        <button class="button-primary" id="themeButton" onclick="updateTheme()">${state.theme === 'dark' ? '☀️' : '🌙'}</button>
+                    </div>
+                    <div class="grid-layout">
+                        <div id="encoder" class="card"></div>
+                        <div id="decoder" class="card"></div>
+                    </div>
+                    <footer class="text-center text-muted mt-4">© 2025 ZeroDeadDrop (a project by Tuyen Evans)</footer>
+                </div>
+            `;
+            document.documentElement.classList.add(state.theme);
+            renderEncoderPanel();
+            renderDecoderPanel();
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
