@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>ZeroDeadDrop - Stateless Offline Secure File Encryption</title>
+    <style>
+        :root {
+            --primary-color: #5D5CDE;
+            --primary-dark: #4F4EC6;
+            --background-color: #F8F9FA;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --input-bg: #ffffff;
+            --input-border: #d1d5db;
+            --button-text: #ffffff;
+            --success-bg: #f0fdf4;
+            --success-border: #bbf7d0;
+            --success-text: #16a34a;
+            --error-bg: #fef2f2;
+            --error-border: #fecaca;
+            --info-bg: #eff6ff;
+            --info-border: #bfdbfe;
+            --spinner-border: #f3f3f3;
+            --spinner-top: #5D5CDE;
+            --list-bg: #f9fafb;
+            --list-border: #e5e7eb;
+            --accent-glow: rgba(93, 92, 222, 0.1);
+            --security-green: #059669;
+            --security-green-bg: #ecfdf5;
+            --gradient-start: #5D5CDE;
+            --gradient-end: #4F4EC6;
+            --header-color: #000000;
+        }
+        .dark {
+            --background-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e5e5e5;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --input-bg: #27272a;
+            --input-border: #4b5563;
+            --success-bg: #134e4a;
+            --success-border: #059669;
+            --success-text: #10b981;
+            --error-bg: #7f1d1d;
+            --error-border: #ef4444;
+            --info-bg: #1e3a8a;
+            --info-border: #3b82f6;
+            --spinner-border: #27272a;
+            --spinner-top: #5D5CDE;
+            --list-bg: #27272a;
+            --list-border: #4b5563;
+            --accent-glow: rgba(93, 92, 222, 0.2);
+            --security-green: #10b981;
+            --security-green-bg: #064e3b;
+            --gradient-start: #5D5CDE;
+            --gradient-end: #7C7CFF;
+            --header-color: #ffffff;
+        }
+        * { box-sizing: border-box; }
+        body { 
+            min-height: 100vh;
+            margin: 0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem 3rem 1rem;
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            opacity: 0.8;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        .loading-spinner {
+            border: 4px solid var(--spinner-border);
+            border-top: 4px solid var(--spinner-top); 
+            border-radius: 50%;
+            width: 20px; 
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .input-text-area, select.input-text-area, input[type="number"].input-text-area {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--input-border);
+            border-radius: 0.75rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .input-text-area:focus, select.input-text-area:focus, input[type="number"].input-text-area:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+            outline: none;
+        }
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px solid var(--list-border);
+            border-radius: 0.75rem;
+            background-color: var(--list-bg);
+            transition: all 0.3s ease;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .list-item:hover {
+            transform: translateX(4px);
+            border-color: var(--primary-color);
+        }
+        .list-item-content {
+            flex: 1 1 auto;
+            min-width: 0;
+            word-break: break-word;
+        }
+        .list-item-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+            .list-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .list-item-actions {
+                width: 100%;
+                justify-content: stretch;
+            }
+            .list-item-actions button {
+                flex: 1;
+                min-width: 0;
+            }
+        }
+        .hero-title {
+            font-weight: 900;
+            text-align: center;
+            line-height: 1.1;
+            color: var(--header-color);
+            margin-bottom: 0.5rem;
+        }
+        .tagline {
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 0.5rem auto 2rem;
+            max-width: 900px;
+            line-height: 1.5;
+        }
+        .button-primary {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: var(--button-text);
+            border: none;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-family: inherit;
+            font-size: 1rem;
+            min-height: 48px;
+            min-width: 48px;
+        }
+        .button-primary:hover:not(:disabled) {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(93, 92, 222, 0.3);
+        }
+        .button-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+            height: 6px;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .checkbox-option:hover {
+            border-color: var(--primary-color);
+        }
+        .checkbox-option input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+        .warning-banner {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #856404;
+        }
+        .dark .warning-banner {
+            background: #664d03;
+            border-color: #ffc107;
+            color: #ffecb5;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            max-width: 90%;
+            max-height: 90vh;
+            width: 90%;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        .modal-close:hover {
+            color: var(--primary-color);
+        }
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--list-bg);
+            margin: 1rem -2rem 0;
+            padding: 0 2rem;
+        }
+        .tab-button {
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .tab-button.active {
+            border-bottom: 2px solid #14b8a6;
+            color: #14b8a6;
+            background: var(--card-bg);
+        }
+        .hidden { display: none !important; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-3 > * + * { margin-top: 0.75rem; }
+        .space-y-4 > * + * { margin-top: 1rem; }
+        .space-y-6 > * + * { margin-top: 1.5rem; }
+        .space-x-2 > * + * { margin-left: 0.5rem; }
+        .w-full { width: 100%; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: 700; }
+        .text-sm { font-size: 0.875rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-2xl { font-size: 1.5rem; }
+        .text-4xl { font-size: 2.25rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-4 { margin-top: 1rem; }
+        .pt-4 { padding-top: 1rem; }
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .list-disc { list-style-type: disc; word-break: break-word; overflow-wrap: break-word; }
+        .pl-6 { padding-left: 1.5rem; }
+        .overflow-y-auto { overflow-y: auto; }
+        .max-h-64 { max-height: 16rem; }
+        .timer-red { color: red; font-weight: bold; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .text-success { color: var(--success-text); }
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+        }
+        .passphrase-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        @media (max-width: 768px) {
+            .grid-cols-3 {
+                grid-template-columns: 1fr;
+            }
+            .passphrase-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .passphrase-container input {
+                margin-bottom: 0.5rem;
+            }
+            .button-primary {
+                padding: 1.2rem;
+                font-size: 1.1rem;
+            }
+            .input-text-area {
+                font-size: 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+            }
+            .tagline {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="instructionsModal" class="modal-overlay hidden" onclick="if(event.target === this) ZeroDeadDrop.toggleInstructions()">
+        <div class="modal-content">
+            <button class="modal-close" onclick="ZeroDeadDrop.toggleInstructions()">&times;</button>
+            <div id="instructionsContent"></div>
+        </div>
+    </div>
+    <script>
+        (function checkCompatibility() {
+            if (!window.crypto || !window.crypto.subtle) {
+                document.body.innerHTML = '<div style="padding:2rem;text-align:center;color:red;font-size:1.5rem;">ERROR: Web Crypto API not supported. Use Chrome 88+, Firefox 85+, Safari 14+, or Edge 88+</div>';
+                throw new Error("Incompatible browser");
+            }
+        })();
+
+        const CONFIG = {
+            CHUNK_SIZE: 2097152,
+            MAX_TEXT_LENGTH: 1000000,
+            MAX_TOTAL_SIZE: 1073741824,
+            MAX_FILE_SIZE: 524288000,
+            PURGE_DELAY: 300,
+            INACTIVITY_TIMEOUT: 300,
+            PROGRESS_UPDATE_INTERVAL: 50,
+            YIELD_INTERVAL: 5
+        };
+
+        function showCustomAlert(message) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <p style="margin-bottom: 1rem;">${message}</p>
+                    <button class="button-primary w-full">OK</button>
+                </div>
+            `;
+            const okButton = modal.querySelector('button');
+            okButton.addEventListener('click', () => modal.remove());
+            document.body.appendChild(modal);
+        }
+
+        function showCustomConfirm(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" style="max-width: 400px;">
+                    <p style="margin-bottom: 1rem;">${message}</p>
+                    <div class="flex gap-2">
+                        <button class="button-primary w-full">Cancel</button>
+                        <button class="button-primary w-full">Confirm</button>
+                    </div>
+                </div>
+            `;
+            const buttons = modal.querySelectorAll('button');
+            const cancelButton = buttons[0];
+            const confirmButton = buttons[1];
+            cancelButton.addEventListener('click', () => modal.remove());
+            confirmButton.addEventListener('click', () => {
+                modal.remove();
+                onConfirm();
+            });
+            document.body.appendChild(modal);
+        }
+
+        const ZeroDeadDrop = {
+            state: {
+                theme: 'dark',
+                showInstructionsModal: false,
+                textInput: '',
+                files: [],
+                passphrase: '',
+                iterations: 300000, 
+                hashAlgorithm: 'SHA-256',
+                isEncoding: false,
+                manifest: null,
+                chunkBundle: null,
+                progress: 0,
+                manifestInput: '',
+                decPassphrase: '',
+                isDecoding: false,
+                decProgress: 0,
+                decodedFiles: [],
+                chunkBundleFile: null,
+                chunkBundleInput: '',
+                manifestFile: null,
+                encryptedChunksMap: null,
+                showPassphrase: false,
+                showDecPassphrase: false,
+                blobUrls: [], 
+                autoDownloadBundle: true,
+                autoDownloadManifest: false,
+                activeTab: 'overview',
+                showManifestView: false,
+                showBundleView: false,
+                showAdvancedSettings: false,
+                purgeTimer: null,
+                inactivityTimer: null,
+                sessionStartTime: performance.now(),
+                remainingTime: CONFIG.PURGE_DELAY,
+                manifestValid: false,
+                manifestJson: '',
+                viewedTexts: {},
+                combineOutput: false,
+                showCombinedView: false,
+                combinedFile: null,
+                combinedInput: '',
+                currentStatus: '',
+                lastProgressUpdate: 0,
+                lastUpdate: 0
+            },
+
+            generateRandomId: function(length = 16) {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?/';
+                const array = new Uint8Array(length);
+                crypto.getRandomValues(array);
+                return Array.from(array, (byte) => chars[byte % chars.length]).join('');
+            },
+
+            formatBytes: function(bytes, decimals = 2) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const dm = decimals < 0 ? 0 : decimals;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+            },
+
+            arrayBufferToBase64: function(buffer) {
+                let binary = '';
+                const bytes = new Uint8Array(buffer);
+                const len = bytes.byteLength;
+                for (let i = 0; i < len; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                return btoa(binary);
+            },
+
+            base64ToArrayBuffer: function(base64) {
+                const binary = atob(base64);
+                const len = binary.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes.buffer;
+            },
+
+            arrayToBase64: function(arr) {
+                const uint8Array = new Uint8Array(arr);
+                return btoa(String.fromCharCode(...uint8Array));
+            },
+
+            base64ToArray: function(base64) {
+                const binary = atob(base64);
+                const len = binary.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return bytes;
+            },
+
+            validateJSON: function(jsonString, expectedType) {
+                if (!jsonString || jsonString.trim() === '') {
+                    throw new Error('JSON string is empty');
+                }
+                try {
+                    const parsed = JSON.parse(jsonString);
+                    
+                    if (expectedType === 'manifest') {
+                        if (!parsed.manifestId || !parsed.encodedItems || !Array.isArray(parsed.encodedItems)) {
+                            throw new Error("Invalid manifest: missing manifestId or encodedItems");
+                        }
+                        if (!parsed.iterations || !parsed.hashAlgorithm) {
+                            throw new Error("Missing encryption parameters");
+                        }
+                        if (parsed.encodedItems.length === 0) {
+                            throw new Error("Manifest contains no items");
+                        }
+                    } else if (expectedType === 'bundle') {
+                        if (!parsed.chunks || !Array.isArray(parsed.chunks)) {
+                            throw new Error("Invalid bundle: missing chunks array");
+                        }
+                        if (parsed.chunks.length === 0) {
+                            throw new Error("Bundle is empty");
+                        }
+                        for (let i = 0; i < Math.min(parsed.chunks.length, 5); i++) {
+                            const chunk = parsed.chunks[i];
+                            if (!chunk.chunkId || !chunk.cipher || !chunk.salt || !chunk.iv) {
+                                throw new Error(`Chunk ${i} is malformed`);
+                            }
+                        }
+                    }
+                    
+                    return parsed;
+                } catch (e) {
+                    throw new Error(`JSON validation failed: ${e.message}`);
+                }
+            },
+
+            escapeHtml: function(text) {
+                return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            },
+
+            deriveKey: async function(passphrase, salt, iterations, hashAlgorithm) {
+                try {
+                    const enc = new TextEncoder();
+                    const keyMaterial = await crypto.subtle.importKey(
+                        "raw", enc.encode(passphrase), { name: "PBKDF2" }, false, ["deriveKey"]
+                    );
+                    return await crypto.subtle.deriveKey(
+                        { name: "PBKDF2", salt, iterations, hash: hashAlgorithm },
+                        keyMaterial, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]
+                    );
+                } catch (e) {
+                    throw new Error(`Key derivation failed: ${e.message}`);
+                }
+            },
+
+            encryptChunk: async function(chunkBuffer, passphrase, iterations, hashAlgorithm) {
+                try {
+                    const salt = crypto.getRandomValues(new Uint8Array(16));
+                    const iv = crypto.getRandomValues(new Uint8Array(12));
+                    const key = await this.deriveKey(passphrase, salt, iterations, hashAlgorithm);
+                    const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, chunkBuffer);
+                    return { 
+                        cipher: this.arrayBufferToBase64(cipher),
+                        salt: this.arrayToBase64(salt),
+                        iv: this.arrayToBase64(iv)
+                    };
+                } catch (e) {
+                    throw new Error(`Chunk encryption failed: ${e.message}`);
+                }
+            },
+
+            decryptChunk: async function(cipherB64, saltB64, ivB64, passphrase, iterations, hashAlgorithm) {
+                try {
+                    const cipher = this.base64ToArrayBuffer(cipherB64);
+                    const salt = this.base64ToArrayBuffer(saltB64);
+                    const iv = this.base64ToArrayBuffer(ivB64);
+                    const key = await this.deriveKey(passphrase, salt, iterations, hashAlgorithm);
+                    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, cipher);
+                    return new Uint8Array(decrypted);
+                } catch (e) {
+                    throw new Error(`Chunk decryption failed: ${e.message}`);
+                }
+            },
+
+            cleanupBlobUrls: function() {
+                this.state.blobUrls.forEach(url => URL.revokeObjectURL(url));
+                this.state.blobUrls = [];
+            },
+
+            updateTheme: function() {
+                this.state.theme = this.state.theme === 'light' ? 'dark' : 'light';
+                document.documentElement.classList.toggle('dark', this.state.theme === 'dark');
+                const themeButton = document.getElementById('themeButton');
+                if (themeButton) {
+                    themeButton.innerHTML = this.state.theme === 'dark' ? '☀️' : '🌙';
+                }
+            },
+            
+            toggleInstructions: function() {
+                this.state.showInstructionsModal = !this.state.showInstructionsModal;
+                const modal = document.getElementById('instructionsModal');
+                modal.classList.toggle('hidden', !this.state.showInstructionsModal);
+                if (this.state.showInstructionsModal) {
+                    this.renderInstructionsContent();
+                }
+                this.resetInactivityTimer();
+            },
+
+            updateCharCount: function() {
+                const charCountEl = document.getElementById('charCount');
+                if (charCountEl) {
+                    charCountEl.textContent = `Characters: ${this.state.textInput.length.toLocaleString()} / ${CONFIG.MAX_TEXT_LENGTH.toLocaleString()}`;
+                }
+            },
+
+            handleTextChange: function(e) {
+                try {
+                    const newText = e.target.value;
+                    if (newText.length > CONFIG.MAX_TEXT_LENGTH) {
+                        showCustomAlert("Text exceeds 1,000,000 character limit");
+                        e.target.value = this.state.textInput;
+                        return;
+                    }
+                    this.state.textInput = newText;
+                    this.updateCharCount();
+                    this.updateProgressBar(0);
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Text input error: ${e.message}`);
+                }
+            },
+
+            handleFileChange: function(e) {
+                try {
+                    if (!e.target.files || e.target.files.length === 0) {
+                        return;
+                    }
+                    const newFiles = Array.from(e.target.files);
+                    const oversizedFiles = newFiles.filter(f => f.size > CONFIG.MAX_FILE_SIZE);
+                    if (oversizedFiles.length > 0) {
+                        showCustomAlert(`The following files exceed the ${this.formatBytes(CONFIG.MAX_FILE_SIZE)} limit: ${oversizedFiles.map(f => f.name).join(', ')}`);
+                        e.target.value = '';
+                        return;
+                    }
+                    const currentSize = this.state.files.reduce((acc, f) => acc + f.size, 0) + (this.state.textInput.length * 2);
+                    const newSize = newFiles.reduce((acc, f) => acc + f.size, 0);
+                    
+                    if (currentSize + newSize > CONFIG.MAX_TOTAL_SIZE) {
+                        showCustomAlert("Total size would exceed 1GB limit");
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    this.state.files = [...this.state.files, ...newFiles];
+                    e.target.value = '';
+                    this.renderEncoderPanel();
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`File upload error: ${e.message}`);
+                    e.target.value = '';
+                }
+            },
+
+            removeFile: function(index) {
+                this.state.files = this.state.files.filter((_, i) => i !== index);
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            clearTextInput: function() {
+                this.state.textInput = '';
+                const textArea = document.querySelector('textarea[placeholder="Enter text to encrypt (optional)"]');
+                if (textArea) {
+                    textArea.value = '';
+                }
+                this.updateCharCount();
+                this.resetInactivityTimer();
+            },
+
+            togglePassphraseVisibility: function() {
+                this.state.showPassphrase = !this.state.showPassphrase;
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            toggleDecPassphraseVisibility: function() {
+                this.state.showDecPassphrase = !this.state.showDecPassphrase;
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            generatePassphrase: function() {
+                this.state.passphrase = this.generateRandomId(24);
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            toggleManifestView: function() {
+                this.state.showManifestView = !this.state.showManifestView;
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            toggleBundleView: function() {
+                this.state.showBundleView = !this.state.showBundleView;
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            toggleAdvancedSettings: function() {
+                this.state.showAdvancedSettings = !this.state.showAdvancedSettings;
+                this.renderEncoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            checkPassphraseStrength: function(passphrase) {
+                if (passphrase.length < 12) return 'weak';
+                if (/[a-zA-Z]/.test(passphrase) && /[0-9]/.test(passphrase) && /[^a-zA-Z0-9]/.test(passphrase)) {
+                    return 'strong';
+                }
+                return 'medium';
+            },
+
+            handleEncode: async function() {
+                try {
+                    const hasText = this.state.textInput.trim().length > 0;
+                    const totalItems = this.state.files.length + (hasText ? 1 : 0);
+                    
+                    if (totalItems === 0) {
+                        showCustomAlert("Please enter text or select files to encrypt");
+                        return;
+                    }
+                    if (this.state.passphrase.length < 8) {
+                        showCustomAlert("Passphrase must be at least 8 characters long");
+                        return;
+                    }
+                    if (this.checkPassphraseStrength(this.state.passphrase) === 'weak') {
+                        showCustomAlert("Warning: Passphrase is weak. Consider using a longer passphrase with letters, numbers, and symbols.");
+                    }
+
+                    this.state.isEncoding = true;
+                    this.state.progress = 0;
+                    this.state.manifest = null;
+                    this.state.chunkBundle = null;
+                    this.state.lastProgressUpdate = performance.now();
+                    this.state.currentStatus = 'Preparing...';
+                    this.renderEncoderPanel();
+
+                    const manifestId = this.generateRandomId(16);
+                    const itemsToEncode = [];
+                    const chunkBundle = { chunks: [] };
+
+                    if (hasText) {
+                        const textBlob = new Blob([this.state.textInput], { type: 'text/plain' });
+                        itemsToEncode.push({
+                            dataItemId: this.generateRandomId(8),
+                            originalName: `note_${this.generateRandomId(8)}.txt`,
+                            originalType: 'text/plain',
+                            blob: textBlob,
+                            chunkIds: []
+                        });
+                    }
+
+                    for (const file of this.state.files) {
+                        itemsToEncode.push({
+                            dataItemId: this.generateRandomId(8),
+                            originalName: file.name,
+                            originalType: file.type || 'application/octet-stream',
+                            blob: file,
+                            chunkIds: []
+                        });
+                    }
+
+                    const totalSize = itemsToEncode.reduce((sum, item) => sum + item.blob.size, 0);
+                    const totalChunks = itemsToEncode.reduce((sum, item) => sum + Math.ceil(item.blob.size / CONFIG.CHUNK_SIZE), 0);
+                    let chunksProcessed = 0;
+                    const encodedItems = [];
+
+                    for (const item of itemsToEncode) {
+                        const numChunks = Math.ceil(item.blob.size / CONFIG.CHUNK_SIZE);
+                        if (numChunks === 0) continue;
+                        
+                        this.state.currentStatus = `Processing: ${item.originalName}`;
+                        this.updateProgress(chunksProcessed, totalChunks);
+
+                        for (let i = 0; i < numChunks; i++) {
+                            if (!this.state.isEncoding) {
+                                throw new Error("Encryption cancelled by user");
+                            }
+
+                            const offset = i * CONFIG.CHUNK_SIZE;
+                            const slice = item.blob.slice(offset, offset + CONFIG.CHUNK_SIZE);
+                            let chunkBuffer;
+                            try {
+                                chunkBuffer = await slice.arrayBuffer();
+                            } catch (e) {
+                                throw new Error(`Failed to read chunk: ${e.message}`);
+                            }
+                            
+                            const chunkId = this.generateRandomId(12);
+                            const encrypted = await this.encryptChunk(
+                                chunkBuffer,
+                                this.state.passphrase,
+                                this.state.iterations,
+                                this.state.hashAlgorithm
+                            );
+                            chunkBuffer = null;
+                            
+                            chunkBundle.chunks.push({
+                                chunkId,
+                                cipher: encrypted.cipher,
+                                salt: encrypted.salt,
+                                iv: encrypted.iv
+                            });
+                            item.chunkIds.push({ id: chunkId, chunkIndex: i });
+                            
+                            chunksProcessed++;
+                            this.state.currentStatus = `Encrypting: ${item.originalName} (${chunksProcessed}/${totalChunks} chunks)`;
+                            
+                            if (chunksProcessed % CONFIG.YIELD_INTERVAL === 0) {
+                                const now = performance.now();
+                                if (now - this.state.lastProgressUpdate > CONFIG.PROGRESS_UPDATE_INTERVAL) {
+                                    this.state.progress = (chunksProcessed / totalChunks) * 100;
+                                    this.updateProgress(chunksProcessed, totalChunks);
+                                    this.state.lastProgressUpdate = now;
+                                }
+                                await new Promise(resolve => requestAnimationFrame(resolve));
+                            }
+                        }
+                        
+                        this.state.currentStatus = `Encrypting metadata for: ${item.originalName}`;
+                        this.updateProgress(chunksProcessed, totalChunks);
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+                        
+                        const nameBuffer = new TextEncoder().encode(item.originalName);
+                        const encryptedName = await this.encryptChunk(
+                            nameBuffer,
+                            this.state.passphrase,
+                            this.state.iterations,
+                            this.state.hashAlgorithm
+                        );
+
+                        const typeBuffer = new TextEncoder().encode(item.originalType);
+                        const encryptedType = await this.encryptChunk(
+                            typeBuffer,
+                            this.state.passphrase,
+                            this.state.iterations,
+                            this.state.hashAlgorithm
+                        );
+
+                        encodedItems.push({
+                            dataItemId: item.dataItemId,
+                            encryptedName,
+                            encryptedType,
+                            fileSize: item.blob.size,
+                            chunkIds: item.chunkIds,
+                            chunkCount: numChunks
+                        });
+                    }
+
+                    this.state.currentStatus = 'Finalizing...';
+                    this.updateProgress(chunksProcessed, totalChunks);
+                    await new Promise(resolve => requestAnimationFrame(resolve));
+
+                    const finalManifest = {
+                        manifestId,
+                        timestamp: performance.now(),
+                        totalItems,
+                        totalChunks,
+                        totalSize: itemsToEncode.reduce((sum, i) => sum + i.blob.size, 0),
+                        encodedItems,
+                        iterations: this.state.iterations,
+                        hashAlgorithm: this.state.hashAlgorithm
+                    };
+
+                    this.state.manifest = finalManifest;
+                    this.state.chunkBundle = chunkBundle;
+                    this.state.progress = 100;
+                    this.state.currentStatus = 'Complete!';
+
+                    if (this.state.autoDownloadBundle) {
+                        this.downloadBundle();
+                    }
+                    if (this.state.autoDownloadManifest) {
+                        this.downloadManifest();
+                    }
+                    if (this.state.combineOutput) {
+                        const combined = {manifest: this.state.manifest, bundle: this.state.chunkBundle};
+                        const combinedBlob = new Blob([JSON.stringify(combined)], { type: 'application/json' });
+                        const url = URL.createObjectURL(combinedBlob);
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.download = `zd_combined_${this.generateRandomId(8)}.json`;
+                        link.click();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }
+
+                    this.state.passphrase = '';
+                    showCustomAlert(`✅ Encryption complete! ${encodedItems.length} items encrypted into ${totalChunks} secure chunks.`);
+                } catch (e) {
+                    let userMessage = "Encryption failed: ";
+                    if (e.message.includes("cancelled")) {
+                        userMessage += "Operation was cancelled.";
+                    } else if (e.message.includes("memory") || e.name === "QuotaExceededError") {
+                        userMessage += "Out of memory. Try smaller files.";
+                    } else {
+                        userMessage += e.message;
+                    }
+                    showCustomAlert(userMessage);
+                } finally {
+                    this.state.isEncoding = false;
+                    this.state.currentStatus = '';
+                    this.renderEncoderPanel();
+                }
+            },
+
+            downloadBundle: function() {
+                try {
+                    if (!this.state.chunkBundle) return;
+                    const chunkBundleBlob = new Blob([JSON.stringify(this.state.chunkBundle)], { type: 'application/json' });
+                    const url = URL.createObjectURL(chunkBundleBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `zd_bundle_${this.generateRandomId(8)}.json`;
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Download bundle failed: ${e.message}`);
+                }
+            },
+
+            copyToClipboard: function(text, successMsg, errorMsg) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.left = '-999999px';
+                textarea.style.top = '-999999px';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showCustomAlert(successMsg);
+                } catch (err) {
+                    showCustomAlert(errorMsg);
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            },
+
+            copyBundle: function() {
+                if (!this.state.chunkBundle) return showCustomAlert("No bundle to copy.");
+                try {
+                    const text = JSON.stringify(this.state.chunkBundle, null, 2);
+                    this.copyToClipboard(text, "✅ Bundle copied to clipboard", "❌ Failed to copy bundle. Try downloading instead.");
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Copy bundle failed: ${e.message}. Try downloading instead.`);
+                }
+            },
+
+            downloadManifest: function() {
+                try {
+                    if (!this.state.manifest) return;
+                    const manifestBlob = new Blob([JSON.stringify(this.state.manifest, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(manifestBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `zd_manifest_${this.generateRandomId(8)}.json`;
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Download manifest failed: ${e.message}`);
+                }
+            },
+
+            copyManifest: function() {
+                if (!this.state.manifest) return showCustomAlert("No manifest to copy.");
+                try {
+                    const text = JSON.stringify(this.state.manifest, null, 2);
+                    this.copyToClipboard(text, "✅ Manifest copied to clipboard", "❌ Failed to copy manifest. Try downloading instead.");
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Copy manifest failed: ${e.message}. Try downloading instead.`);
+                }
+            },
+
+            downloadCombined: function() {
+                try {
+                    if (!this.state.manifest || !this.state.chunkBundle) return;
+                    const combined = {manifest: this.state.manifest, bundle: this.state.chunkBundle};
+                    const blob = new Blob([JSON.stringify(combined, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `zd_combined_${this.generateRandomId(8)}.json`;
+                    link.click();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch (e) {
+                    showCustomAlert(`Download combined failed: ${e.message}`);
+                }
+            },
+
+            copyCombined: function() {
+                if (!this.state.manifest || !this.state.chunkBundle) return showCustomAlert("No data to copy.");
+                try {
+                    const combined = {manifest: this.state.manifest, bundle: this.state.chunkBundle};
+                    const text = JSON.stringify(combined, null, 2);
+                    this.copyToClipboard(text, "✅ Combined copied to clipboard", "❌ Failed to copy combined. Try downloading instead.");
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Copy combined failed: ${e.message}. Try downloading instead.`);
+                }
+            },
+
+            toggleCombinedView: function() {
+                this.state.showCombinedView = !this.state.showCombinedView;
+                this.renderEncoderPanel();
+            },
+
+            importChunkBundle: async function() {
+                try {
+                    let text;
+                    if (this.state.chunkBundleFile) {
+                        text = await this.state.chunkBundleFile.text();
+                    } else if (this.state.chunkBundleInput.trim()) {
+                        text = this.state.chunkBundleInput;
+                    } else {
+                        showCustomAlert("Please select a file or paste JSON");
+                        return;
+                    }
+
+                    const chunkBundle = this.validateJSON(text, 'bundle');
+
+                    const chunksMap = new Map();
+                    chunkBundle.chunks.forEach(chunk => {
+                        chunksMap.set(chunk.chunkId, {
+                            cipher: chunk.cipher,
+                            salt: chunk.salt,
+                            iv: chunk.iv
+                        });
+                    });
+                    
+                    this.state.encryptedChunksMap = chunksMap;
+                    showCustomAlert(`✅ Imported ${chunkBundle.chunks.length} encrypted chunks`);
+                    this.renderDecoderPanel();
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`❌ Bundle import failed: ${e.message}`);
+                }
+            },
+
+            importManifest: async function() {
+                try {
+                    let text;
+                    if (this.state.manifestFile) {
+                        text = await this.state.manifestFile.text();
+                    } else if (this.state.manifestInput.trim()) {
+                        text = this.state.manifestInput;
+                    } else {
+                        showCustomAlert("Please select a file or paste JSON");
+                        return;
+                    }
+
+                    const parsed = this.validateJSON(text, 'manifest');
+                    this.state.manifestJson = text;
+                    this.state.manifestValid = true;
+                    showCustomAlert(`✅ Manifest loaded (${parsed.totalItems} items, ${parsed.totalChunks} chunks)`);
+                    this.renderDecoderPanel();
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    this.state.manifestValid = false;
+                    showCustomAlert(`❌ Manifest load failed: ${e.message}`);
+                }
+            },
+
+            importCombined: async function() {
+                try {
+                    let text;
+                    if (this.state.combinedFile) {
+                        text = await this.state.combinedFile.text();
+                    } else if (this.state.combinedInput.trim()) {
+                        text = this.state.combinedInput;
+                    } else {
+                        showCustomAlert("Please select a file or paste JSON");
+                        return;
+                    }
+                    const combined = JSON.parse(text);
+                    if (!combined.manifest || !combined.bundle) {
+                        throw new Error("Invalid combined format");
+                    }
+                    const manifest = this.validateJSON(JSON.stringify(combined.manifest), 'manifest');
+                    const bundle = this.validateJSON(JSON.stringify(combined.bundle), 'bundle');
+                    this.state.manifestJson = JSON.stringify(manifest);
+                    this.state.manifestValid = true;
+                    const chunksMap = new Map();
+                    bundle.chunks.forEach(chunk => {
+                        chunksMap.set(chunk.chunkId, {
+                            cipher: chunk.cipher,
+                            salt: chunk.salt,
+                            iv: chunk.iv
+                        });
+                    });
+                    this.state.encryptedChunksMap = chunksMap;
+                    showCustomAlert(`✅ Imported combined: ${bundle.chunks.length} chunks, ${manifest.totalItems} items`);
+                    this.renderDecoderPanel();
+                } catch (e) {
+                    showCustomAlert(`❌ Combined import failed: ${e.message}`);
+                }
+            },
+
+            handleDecode: async function() {
+                try {
+                    if (this.state.isDecoding) return;
+                    
+                    this.cleanupBlobUrls();
+                    this.state.decodedFiles = [];
+                    this.state.viewedTexts = {};
+                    this.state.decProgress = 0;
+                    this.state.lastProgressUpdate = performance.now();
+                    this.state.currentStatus = 'Preparing...';
+
+                    if (this.state.decPassphrase.length < 8) {
+                        showCustomAlert("Passphrase must be at least 8 characters");
+                        return;
+                    }
+                    if (!this.state.encryptedChunksMap) {
+                        showCustomAlert("Please import chunk bundle first");
+                        return;
+                    }
+
+                    let manifestJson = this.state.manifestJson || this.state.manifestInput;
+                    if (!manifestJson.trim()) {
+                        showCustomAlert("Please paste or upload the manifest JSON");
+                        return;
+                    }
+
+                    let parsedManifest = this.validateJSON(manifestJson, 'manifest');
+
+                    this.state.isDecoding = true;
+                    this.renderDecoderPanel();
+
+                    const totalChunks = parsedManifest.encodedItems.reduce((sum, item) => sum + (item.chunkCount || 0), 0);
+                    let chunksProcessed = 0;
+                    const reconstructedFiles = [];
+
+                    for (const item of parsedManifest.encodedItems) {
+                        const numChunks = item.chunkCount || 0;
+                        if (numChunks === 0) continue;
+
+                        const fileChunks = new Array(numChunks);
+                        
+                        this.state.currentStatus = `Decrypting file chunks...`;
+                        this.updateProgress(chunksProcessed, totalChunks);
+
+                        for (let i = 0; i < numChunks; i++) {
+                            if (!this.state.isDecoding) {
+                                throw new Error("Decryption cancelled by user");
+                            }
+
+                            const chunkMeta = item.chunkIds.find(c => c.chunkIndex === i);
+                            if (!chunkMeta) throw new Error(`Missing chunk metadata for index ${i}`);
+
+                            const encryptedChunk = this.state.encryptedChunksMap.get(chunkMeta.id);
+                            if (!encryptedChunk) throw new Error(`Chunk ${chunkMeta.id} not found in bundle`);
+
+                            let decrypted = await this.decryptChunk(
+                                encryptedChunk.cipher,
+                                encryptedChunk.salt,
+                                encryptedChunk.iv,
+                                this.state.decPassphrase,
+                                parsedManifest.iterations || 300000, 
+                                parsedManifest.hashAlgorithm || 'SHA-256'
+                            );
+                            
+                            fileChunks[i] = decrypted;
+                            chunksProcessed++;
+                            this.state.currentStatus = `Decrypting: (${chunksProcessed}/${totalChunks} chunks)`;
+
+                            if (chunksProcessed % CONFIG.YIELD_INTERVAL === 0) {
+                                const now = performance.now();
+                                if (now - this.state.lastProgressUpdate > CONFIG.PROGRESS_UPDATE_INTERVAL) {
+                                    this.state.decProgress = totalChunks > 0 ? (chunksProcessed / totalChunks) * 100 : 0;
+                                    this.updateProgress(chunksProcessed, totalChunks);
+                                    this.state.lastProgressUpdate = now;
+                                }
+                                await new Promise(resolve => requestAnimationFrame(resolve));
+                            }
+                        }
+
+                        this.state.currentStatus = `Reconstructing file...`;
+                        this.updateProgress(chunksProcessed, totalChunks);
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+
+                        const totalLength = fileChunks.reduce((sum, chunk) => sum + chunk.length, 0);
+                        let reconstructedBuffer = new Uint8Array(totalLength);
+                        let offset = 0;
+                        for (const chunk of fileChunks) {
+                            reconstructedBuffer.set(chunk, offset);
+                            offset += chunk.length;
+                        }
+                        fileChunks.length = 0; // Help GC
+
+                        this.state.currentStatus = `Decrypting metadata...`;
+                        this.updateProgress(chunksProcessed, totalChunks);
+                        await new Promise(resolve => requestAnimationFrame(resolve));
+
+                        const decryptedNameBytes = await this.decryptChunk(
+                            item.encryptedName.cipher,
+                            item.encryptedName.salt,
+                            item.encryptedName.iv,
+                            this.state.decPassphrase,
+                            parsedManifest.iterations || 300000, 
+                            parsedManifest.hashAlgorithm || 'SHA-256'
+                        );
+                        const originalName = new TextDecoder().decode(decryptedNameBytes);
+
+                        const decryptedTypeBytes = await this.decryptChunk(
+                            item.encryptedType.cipher,
+                            item.encryptedType.salt,
+                            item.encryptedType.iv,
+                            this.state.decPassphrase,
+                            parsedManifest.iterations || 300000, 
+                            parsedManifest.hashAlgorithm || 'SHA-256'
+                        );
+                        const originalType = new TextDecoder().decode(decryptedTypeBytes);
+
+                        const blob = new Blob([reconstructedBuffer], { type: originalType });
+                        const blobUrl = URL.createObjectURL(blob);
+                        this.state.blobUrls.push(blobUrl);
+                        reconstructedBuffer = null;
+
+                        reconstructedFiles.push({
+                            name: originalName,
+                            blob: blob,
+                            size: totalLength,
+                            type: originalType,
+                            blobUrl: blobUrl
+                        });
+                    }
+
+                    this.state.decodedFiles = reconstructedFiles;
+                    this.state.decProgress = 100;
+                    this.state.currentStatus = 'Complete!';
+                    showCustomAlert(`✅ Decryption complete! ${reconstructedFiles.length} files ready. Download now - data purges in 5 minutes!`);
+                    this.startPurgeTimer();
+                    this.startInactivityTimer();
+                    this.renderDecoderPanel();
+                } catch (e) {
+                    let errorMessage = "Decryption failed: ";
+                    if (e.message.includes("operation-specific reason") || e.name === "OperationError") {
+                        errorMessage += "Incorrect passphrase or corrupted data.";
+                    } else if (e.message.includes("cancelled")) {
+                        errorMessage += "Operation was cancelled.";
+                    } else {
+                        errorMessage += e.message;
+                    }
+                    showCustomAlert(`❌ ${errorMessage}`);
+                } finally {
+                    this.state.isDecoding = false;
+                    this.state.currentStatus = '';
+                    this.renderDecoderPanel();
+                }
+            },
+
+            triggerDownload: function(blob, filename) {
+                try {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`Download failed: ${e.message}`);
+                }
+            },
+
+            downloadDecodedFile: function(index) {
+                try {
+                    const file = this.state.decodedFiles[index];
+                    this.triggerDownload(file.blob, file.name);
+                } catch (e) {
+                    showCustomAlert(`Download failed: ${e.message}`);
+                }
+            },
+
+            toggleViewDecoded: function(index) {
+                const file = this.state.decodedFiles[index];
+                if (!file.type.startsWith('text/')) {
+                    showCustomConfirm("This file is not a text file. Viewing may produce unexpected results. Continue?", () => this.doToggleViewDecoded(index));
+                    return;
+                }
+                this.doToggleViewDecoded(index);
+            },
+
+            doToggleViewDecoded: async function(index) {
+                try {
+                    const file = this.state.decodedFiles[index];
+                    if (!this.state.viewedTexts[index]) {
+                        this.state.viewedTexts[index] = { showing: false, text: null };
+                    }
+
+                    const view = this.state.viewedTexts[index];
+                    view.showing = !view.showing;
+
+                    if (view.showing && typeof view.text !== 'string') {
+                        view.text = await file.blob.text();
+                    }
+
+                    this.renderDecoderPanel();
+                    this.resetInactivityTimer();
+                } catch (e) {
+                    showCustomAlert(`View file failed: ${e.message}`);
+                }
+            },
+
+            startPurgeTimer: function() {
+                if (this.state.purgeTimer) {
+                    clearInterval(this.state.purgeTimer);
+                }
+                this.state.remainingTime = CONFIG.PURGE_DELAY;
+                this.state.sessionStartTime = performance.now();
+                this.updateCountdown();
+                this.state.purgeTimer = setInterval(() => {
+                    const elapsed = (performance.now() - this.state.sessionStartTime) / 1000;
+                    this.state.remainingTime = Math.max(0, CONFIG.PURGE_DELAY - Math.floor(elapsed));
+                    this.updateCountdown();
+                    if (this.state.remainingTime <= 0) {
+                        clearInterval(this.state.purgeTimer);
+                        this.state.purgeTimer = null;
+                        this.handleCleanup();
+                    }
+                }, 1000);
+            },
+
+            updateCountdown: function() {
+                const countdownElement = document.getElementById('countdown');
+                if (countdownElement) {
+                    countdownElement.textContent = this.state.remainingTime;
+                    if (this.state.remainingTime <= 10) {
+                        countdownElement.classList.add('timer-red');
+                    } else {
+                        countdownElement.classList.remove('timer-red');
+                    }
+                }
+            },
+
+            startInactivityTimer: function() {
+                this.resetInactivityTimer();
+                document.removeEventListener('mousemove', this.boundResetInactivityTimer);
+                document.removeEventListener('keydown', this.boundResetInactivityTimer);
+                document.removeEventListener('click', this.boundResetInactivityTimer);
+                document.removeEventListener('scroll', this.boundResetInactivityTimer);
+                document.addEventListener('mousemove', this.boundResetInactivityTimer);
+                document.addEventListener('keydown', this.boundResetInactivityTimer);
+                document.addEventListener('click', this.boundResetInactivityTimer);
+                document.addEventListener('scroll', this.boundResetInactivityTimer);
+            },
+
+            resetInactivityTimer: function() {
+                if (this.state.inactivityTimer) {
+                    clearTimeout(this.state.inactivityTimer);
+                }
+                this.state.inactivityTimer = setTimeout(() => {
+                    this.handleCleanup();
+                    document.removeEventListener('mousemove', this.boundResetInactivityTimer);
+                    document.removeEventListener('keydown', this.boundResetInactivityTimer);
+                    document.removeEventListener('click', this.boundResetInactivityTimer);
+                    document.removeEventListener('scroll', this.boundResetInactivityTimer);
+                }, CONFIG.INACTIVITY_TIMEOUT * 1000);
+            },
+
+            handleCleanup: function() {
+                const self = this;
+                if (this.state.decodedFiles.length > 0) {
+                    showCustomConfirm("⚠️ Are you sure? All decrypted files will be permanently erased. Have you downloaded everything?", function() {
+                        self.doCleanup();
+                    });
+                    return;
+                } else {
+                    this.doCleanup();
+                }
+            },
+
+            doCleanup: function() {
+                this.cleanupBlobUrls();
+
+                if (this.state.encryptedChunksMap) {
+                    this.state.encryptedChunksMap.clear();
+                    this.state.encryptedChunksMap = null;
+                }
+
+                if (this.state.purgeTimer) {
+                    clearInterval(this.state.purgeTimer);
+                    this.state.purgeTimer = null;
+                }
+                if (this.state.inactivityTimer) {
+                    clearTimeout(this.state.inactivityTimer);
+                    this.state.inactivityTimer = null;
+                }
+
+                document.removeEventListener('mousemove', this.boundResetInactivityTimer);
+                document.removeEventListener('keydown', this.boundResetInactivityTimer);
+                document.removeEventListener('click', this.boundResetInactivityTimer);
+                document.removeEventListener('scroll', this.boundResetInactivityTimer);
+
+                this.state.manifest = null;
+                this.state.chunkBundle = null;
+                this.state.decodedFiles = [];
+                this.state.manifestInput = '';
+                this.state.chunkBundleInput = '';
+                this.state.manifestFile = null;
+                this.state.chunkBundleFile = null;
+                this.state.decPassphrase = '';
+                this.state.textInput = '';
+                this.state.files = [];
+                this.state.passphrase = '';
+                this.state.progress = 0;
+                this.state.decProgress = 0;
+                this.state.isEncoding = false;
+                this.state.isDecoding = false;
+                this.state.showManifestView = false;
+                this.state.showBundleView = false;
+                this.state.sessionStartTime = performance.now();
+                this.state.manifestValid = false;
+                this.state.manifestJson = '';
+                this.state.viewedTexts = {};
+                this.state.combinedFile = null;
+                this.state.combinedInput = '';
+                this.state.currentStatus = '';
+
+                showCustomAlert("✅ All data purged from memory.");
+                this.renderEncoderPanel();
+                this.renderDecoderPanel();
+            },
+
+            handleManifestChange: function(e) {
+                this.state.manifestInput = e.target.value;
+                this.state.manifestValid = false;
+                this.resetInactivityTimer();
+            },
+
+            handleChunkBundleChange: function(e) {
+                this.state.chunkBundleInput = e.target.value;
+                this.resetInactivityTimer();
+            },
+
+            handleCombinedChange: function(e) {
+                this.state.combinedInput = e.target.value;
+                this.resetInactivityTimer();
+            },
+
+            handleManifestFileChange: function(e) {
+                this.state.manifestFile = e.target.files[0];
+                this.state.manifestValid = false;
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            handleChunkBundleFileChange: function(e) {
+                this.state.chunkBundleFile = e.target.files[0];
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            handleCombinedFileChange: function(e) {
+                this.state.combinedFile = e.target.files[0];
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            removeManifestFile: function() {
+                this.state.manifestFile = null;
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            removeChunkBundleFile: function() {
+                this.state.chunkBundleFile = null;
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            removeCombinedFile: function() {
+                this.state.combinedFile = null;
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            handleIterationsChange: function(e) {
+                this.state.iterations = parseInt(e.target.value) || 300000;
+                this.resetInactivityTimer();
+            },
+
+            handleHashAlgorithmChange: function(e) {
+                this.state.hashAlgorithm = e.target.value;
+                this.resetInactivityTimer();
+            },
+
+            handleAutoDownloadBundleChange: function(e) {
+                this.state.autoDownloadBundle = e.target.checked;
+                this.resetInactivityTimer();
+            },
+
+            handleAutoDownloadManifestChange: function(e) {
+                this.state.autoDownloadManifest = e.target.checked;
+                this.resetInactivityTimer();
+            },
+
+            handleCombineOutputChange: function(e) {
+                this.state.combineOutput = e.target.checked;
+                this.resetInactivityTimer();
+            },
+
+            handleDecPassphraseChange: function(e) {
+                this.state.decPassphrase = e.target.value;
+                this.resetInactivityTimer();
+            },
+
+            cancelOperation: function() {
+                this.state.isEncoding = false;
+                this.state.isDecoding = false;
+                this.state.progress = 0;
+                this.state.decProgress = 0;
+                this.state.currentStatus = '';
+                showCustomAlert("⚠️ Operation cancelled");
+                this.renderEncoderPanel();
+                this.renderDecoderPanel();
+                this.resetInactivityTimer();
+            },
+
+            setActiveTab: function(tabId) {
+                this.state.activeTab = tabId;
+                this.renderInstructionsContent();
+                this.resetInactivityTimer();
+            },
+
+            getTabContent: function(tabId) {
+                switch (tabId) {
+                    case 'overview':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🔐 What is ZeroDeadDrop?</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        <strong>Simple Explanation:</strong> ZeroDeadDrop encrypts your files entirely in your browser using military-grade encryption (AES-256-GCM). 
+                                        It creates three separate pieces: encrypted data, instructions, and a password. All three are needed to decrypt.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🔒 Three-Component Security Architecture</div>
+                                
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #3b82f6;">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🗃️</div>
+                                        <h5 class="font-bold mb-2">1. Encrypted Bundle</h5>
+                                        <p class="text-sm" style="color: var(--text-muted);">Your data scrambled with AES-256-GCM encryption (.json file)</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #14b8a6;">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">📋</div>
+                                        <h5 class="font-bold mb-2">2. Manifest</h5>
+                                        <p class="text-sm" style="color: var(--text-muted);">Instructions on how to reassemble the encrypted data</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #ef4444;">
+                                        <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔑</div>
+                                        <h5 class="font-bold mb-2">3. Passphrase</h5>
+                                        <p class="text-sm" style="color: var(--text-muted);">Your secret password that unlocks everything</p>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ CRITICAL: You need ALL THREE pieces. Lose any one = lose your data permanently.</p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🚫 What "Zero" Means</div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                        <div class="font-bold mb-2">🌐 Zero Servers</div>
+                                        <p class="text-sm" style="color: var(--text-muted);">Everything happens in your browser. No backend, no cloud, no uploads. This HTML file is the entire application.</p>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                        <div class="font-bold mb-2">🙈 Zero Knowledge</div>
+                                        <p class="text-sm" style="color: var(--text-muted);">Developers literally cannot access your data. There's no backend to access, no logs, nothing.</p>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                        <div class="font-bold mb-2">📊 Zero Data Collection</div>
+                                        <p class="text-sm" style="color: var(--text-muted);">No analytics, cookies, or telemetry. ZeroDeadDrop doesn't know who uses this or what you encrypt.</p>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--success-bg); border-left: 4px solid var(--security-green);">
+                                        <div class="font-bold mb-2">📦 Zero Dependencies</div>
+                                        <p class="text-sm" style="color: var(--text-muted);">One self-contained HTML file. No external libraries or frameworks. Works offline.</p>
+                                    </div>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🛡️ Encryption Details</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                    <h6 class="font-bold mb-2">Technical Specifications:</h6>
+                                    <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                        <li><strong>AES-256-GCM:</strong> 256-bit Advanced Encryption Standard in Galois/Counter Mode</li>
+                                        <li><strong>PBKDF2:</strong> Password-Based Key Derivation Function 2 with 300,000+ iterations</li>
+                                        <li><strong>SHA-256/512:</strong> Secure hash algorithms for key derivation</li>
+                                        <li><strong>Random Salts:</strong> Unique 16-byte salt per encryption prevents rainbow table attacks</li>
+                                        <li><strong>Random IVs:</strong> Unique 12-byte initialization vector per chunk</li>
+                                        <li><strong>Web Crypto API:</strong> Browser's native cryptography (not JavaScript implementations)</li>
+                                    </ul>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🌍 Works Completely Offline</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <h6 class="font-bold mb-2" style="color: var(--text-color);">No Internet Required:</h6>
+                                    <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                        <li>Save this HTML file to your computer</li>
+                                        <li>Open with any modern browser - works without internet</li>
+                                        <li>Encrypt and decrypt files on air-gapped systems</li>
+                                        <li>Perfect for maximum security environments</li>
+                                        <li>Share this HTML file itself for secure communication</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+
+                    case 'sender-guide':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">📤 Sender's Guide</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        As the sender, your role is to encrypt files or text securely and distribute the components to the recipient.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">Step 1: Prepare Your Data</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Enter text in the provided textarea (optional, up to 1,000,000 characters).</li>
+                                    <li>Upload files by clicking "Choose Files" (total size up to 1GB, individual files up to 500MB).</li>
+                                    <li>Remove any unwanted files using the "Remove" button.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Step 2: Set Encryption Parameters</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Enter a strong passphrase (minimum 8 characters; recommended 12+ with mix of letters, numbers, symbols).</li>
+                                    <li>Use "Generate" for a random passphrase or "Show/Hide" to view it.</li>
+                                    <li>Toggle "Show Advanced" to adjust PBKDF2 iterations (default 300,000) and hash algorithm (SHA-256 or SHA-512).</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Step 3: Configure Output Options</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Check "Auto Download Bundle" to automatically download the encrypted chunks JSON.</li>
+                                    <li>Check "Auto Download Manifest" to automatically download the manifest JSON.</li>
+                                    <li>Check "Combine Manifest and Bundle" to output a single combined JSON file.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Step 4: Encrypt</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Click "Start Encryption".</li>
+                                    <li>Monitor progress; large files may take time.</li>
+                                    <li>Upon completion, view/copy/download the manifest, bundle, or combined output.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">🚚 How to Send the Three Pieces</div>
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <h4 class="font-bold mb-2" style="color: var(--text-color);">🔥 CRITICAL SECURITY RULE</h4>
+                                    <p class="text-sm" style="color: var(--text-color);">
+                                        NEVER send the passphrase through the same channel as the manifest or encrypted file!
+                                    </p>
+                                    <p class="text-sm" style="color: var(--text-color);">
+                                        If someone intercepts one communication channel, they should only get one piece (useless alone).
+                                    </p>
+                                </div>
+
+                                <div class="grid grid-cols-3 gap-4 mt-4">
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #3b82f6;">
+                                        <h5 class="font-bold mb-2">🗃️ Encrypted File</h5>
+                                        <p class="text-sm mb-2">Send via:</p>
+                                        <ul class="list-disc pl-6 text-xs space-y-1">
+                                            <li>✅ Email attachment</li>
+                                            <li>✅ Cloud storage (Dropbox, Drive)</li>
+                                            <li>✅ File sharing sites</li>
+                                            <li>✅ USB drive</li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #14b8a6;">
+                                        <h5 class="font-bold mb-2">📋 Manifest</h5>
+                                        <p class="text-sm mb-2">Send via:</p>
+                                        <ul class="list-disc pl-6 text-xs space-y-1">
+                                            <li>✅ Different email</li>
+                                            <li>✅ Text message</li>
+                                            <li>✅ Messaging app</li>
+                                            <li>✅ Social media DM</li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #ef4444;">
+                                        <h5 class="font-bold mb-2">🔑 Passphrase</h5>
+                                        <p class="text-sm mb-2">Send via SECURE channel:</p>
+                                        <ul class="list-disc pl-6 text-xs space-y-1">
+                                            <li>🏆 Voice call</li>
+                                            <li>🏆 Signal/encrypted chat</li>
+                                            <li>🏆 In-person</li>
+                                            <li>⚠️ Never same as file/manifest</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl mt-4" style="background: var(--list-bg);">
+                                    <h6 class="font-bold mb-2">💡 Recommended Strategy:</h6>
+                                    <ol class="list-decimal pl-6 text-sm space-y-2" style="color: var(--text-muted);">
+                                        <li><strong>Day 1:</strong> Email the encrypted .json file</li>
+                                        <li><strong>Day 2:</strong> Send manifest via text message or different email</li>
+                                        <li><strong>Day 3:</strong> Call them and verbally share the passphrase</li>
+                                    </ol>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🌐 Offline Security</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <h6 class="font-bold mb-2" style="color: var(--text-color);">Maximum Security Setup:</h6>
+                                    <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                        <li>Download this HTML file to an air-gapped computer</li>
+                                        <li>Disconnect from internet before opening</li>
+                                        <li>Encrypt your files offline</li>
+                                        <li>Transfer encrypted bundle via USB to connected computer</li>
+                                        <li>Send via normal channels - data is already encrypted</li>
+                                    </ul>
+                                </div>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ The biggest weak link of ZeroDeadDrop is human error. Always double-check your passphrase and component distribution.</p>
+                                </div>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ Browser memory limits: Mobile browsers typically allow up to 100MB or less. PC browsers can handle more. Multiple tabs will use more memory. Test and verify with big files before deleting any important files.</p>
+                                </div>
+                            </div>
+                        `;
+
+                    case 'receiver-guide':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">📥 Receiver's Guide</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        As the receiver, you need to collect all three components and use them to decrypt the files.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">Step 1: Collect All Three Components</div>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #3b82f6;">
+                                        <h5 class="font-bold mb-2">🗃️ Encrypted Bundle</h5>
+                                        <p class="text-sm">Large JSON file with encrypted chunks</p>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #14b8a6;">
+                                        <h5 class="font-bold mb-2">📋 Manifest</h5>
+                                        <p class="text-sm">Instructions for reassembly</p>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg); border: 2px solid #ef4444;">
+                                        <h5 class="font-bold mb-2">🔑 Passphrase</h5>
+                                        <p class="text-sm">Secret password from sender</p>
+                                    </div>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">Step 2: Import Data</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>If you have a combined file, use the "Combined" section to import both bundle and manifest at once.</li>
+                                    <li>Otherwise, import the bundle file/JSON in the "Chunk Bundle" section.</li>
+                                    <li>Import the manifest file/JSON in the "Manifest" section.</li>
+                                    <li>You can either upload files or paste JSON text directly.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Step 3: Enter Passphrase</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Enter the exact passphrase the sender gave you.</li>
+                                    <li>Use "Show/Hide" if you need to verify what you typed.</li>
+                                    <li>The passphrase is case-sensitive and must be exactly correct.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Step 4: Decrypt</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Click "Start Decryption" after all components are loaded.</li>
+                                    <li>Monitor progress; large files may take time.</li>
+                                    <li>Upon completion, download files immediately.</li>
+                                </ul>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <h4 class="font-bold mb-2" style="color: var(--text-color);">⏰ CRITICAL: 5-Minute Auto-Purge</h4>
+                                    <p class="text-sm" style="color: var(--text-color);">
+                                        After successful decryption, all data is automatically purged from memory after 5 minutes for security.
+                                        Download your files immediately!
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🚨 Troubleshooting</div>
+                                <div class="space-y-4">
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                        <h6 class="font-bold mb-2">❌ "Incorrect passphrase or corrupted data"</h6>
+                                        <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                            <li>Double-check the passphrase (case-sensitive)</li>
+                                            <li>Verify you have the correct manifest and bundle</li>
+                                            <li>Ensure JSON files aren't corrupted</li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                        <h6 class="font-bold mb-2">❌ "Missing chunk metadata"</h6>
+                                        <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                            <li>The manifest and bundle don't match</li>
+                                            <li>Get the correct pair from sender</li>
+                                        </ul>
+                                    </div>
+                                    <div class="p-4 rounded-xl" style="background: var(--list-bg);">
+                                        <h6 class="font-bold mb-2">❌ "Out of memory"</h6>
+                                        <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-muted);">
+                                            <li>Close other browser tabs</li>
+                                            <li>Use desktop browser instead of mobile</li>
+                                            <li>Ask sender to split large files</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">🌐 Offline Security</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <h6 class="font-bold mb-2" style="color: var(--text-color);">Maximum Security Setup:</h6>
+                                    <ul class="list-disc pl-6 text-sm space-y-1" style="color: var(--text-color);">
+                                        <li>Transfer this HTML file and encrypted bundle to air-gapped computer</li>
+                                        <li>Disconnect from internet before opening</li>
+                                        <li>Decrypt your files offline</li>
+                                        <li>No network access means zero chance of data leakage</li>
+                                        <li>Files never leave your isolated environment</li>
+                                    </ul>
+                                </div>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ The biggest weak link of ZeroDeadDrop is human error. Always double-check your passphrase and component sources.</p>
+                                </div>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ Browser memory limits: Mobile browsers typically allow up to 100MB or less. PC browsers can handle more. Multiple tabs will use more memory. Test and verify with big files before deleting any important files.</p>
+                                </div>
+                            </div>
+                        `;
+
+                    case 'encryption-process':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🔒 Encryption Process</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        ZeroDeadDrop uses client-side encryption to secure your data. Here's a step-by-step explanation of the process.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">1. Data Preparation</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Files/text are split into 2MB chunks for efficient processing.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">2. Key Derivation</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Using PBKDF2 with your passphrase, random salt, and chosen iterations/hash to generate a 256-bit AES key.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">3. Chunk Encryption</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Each chunk is encrypted with AES-256-GCM using a unique salt and IV.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">4. Metadata Encryption</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>File names and types are encrypted separately.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">5. Output Generation</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Bundle: JSON of all encrypted chunks.</li>
+                                    <li>Manifest: JSON with reassembly info.</li>
+                                    <li>Combined: Optional single JSON.</li>
+                                </ul>
+
+                                <div class="p-4 rounded-xl" style="background: var(--error-bg); border: 2px solid var(--error-border);">
+                                    <p class="text-center font-bold" style="color: #ffffff;">⚠️ This app has not been audited. Use for non-critical data only.</p>
+                                </div>
+                            </div>
+                        `;
+
+                    case 'security':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">🛡️ Security Considerations</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        While ZeroDeadDrop uses strong encryption, it has not been professionally audited.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">Strengths</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>End-to-end encryption in browser.</li>
+                                    <li>No data leaves your device.</li>
+                                    <li>Multi-component design prevents single-point compromise.</li>
+                                    <li>Automatic data purge after decryption.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Limitations</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Not professionally audited - use for non-critical data.</li>
+                                    <li>Security depends on passphrase strength and component separation.</li>
+                                    <li>Browser vulnerabilities could affect security.</li>
+                                    <li>No forward secrecy or key rotation.</li>
+                                </ul>
+
+                                <div class="text-lg font-bold mb-4">Best Practices</div>
+                                <ul class="list-disc pl-6 space-y-2">
+                                    <li>Use strong, unique passphrases.</li>
+                                    <li>Distribute components via different channels.</li>
+                                    <li>Verify HTML file integrity before use.</li>
+                                    <li>Use on trusted devices only.</li>
+                                </ul>
+                            </div>
+                        `;
+
+                    case 'legal':
+                        return `
+                            <div class="space-y-6">
+                                <div class="text-2xl font-bold mb-6 text-center" style="color: var(--header-color);">⚖️ Legal & Disclaimer</div>
+                                
+                                <div class="p-4 rounded-xl" style="background: var(--info-bg); border: 2px solid var(--info-border);">
+                                    <p class="text-lg mb-3" style="color: var(--text-color);">
+                                        This application is provided "as is" without warranty of any kind.
+                                    </p>
+                                </div>
+
+                                <div class="text-lg font-bold mb-4">Usage</div>
+                                <p>Use only for lawful purposes. Do not use for illegal activities.</p>
+
+                                <div class="text-lg font-bold mb-4">Liability</div>
+                                <p>Developers are not liable for any data loss, security breaches, or misuse.</p>
+
+                                <div class="text-lg font-bold mb-4">Information</div>
+                                <p>This is a project by Tuyen Evans. More information can be found concerning the licensing, security, copyright, etc at https://github.com/ZeroDeadDrop/ZeroDeadDrop.git</p>
+                            </div>
+                        `;
+                }
+            },
+
+            renderInstructionsContent: function() {
+                const contentDiv = document.getElementById('instructionsContent');
+                if (!contentDiv) return;
+
+                const tabs = [
+                    { id: 'overview', label: 'Overview' },
+                    { id: 'sender-guide', label: 'Sender Guide' },
+                    { id: 'receiver-guide', label: 'Receiver Guide' },
+                    { id: 'encryption-process', label: 'Encryption Process' },
+                    { id: 'security', label: 'Security' },
+                    { id: 'legal', label: 'Legal' }
+                ];
+
+                let html = '<div class="tab-nav">';
+                tabs.forEach(tab => {
+                    html += `<button class="tab-button ${this.state.activeTab === tab.id ? 'active' : ''}" onclick="ZeroDeadDrop.setActiveTab('${tab.id}')">${tab.label}</button>`;
+                });
+                html += '</div>';
+
+                html += this.getTabContent(this.state.activeTab);
+
+                contentDiv.innerHTML = html;
+            },
+
+            updateProgress: function(chunksProcessed, totalChunks) {
+                const now = performance.now();
+                if (now - this.state.lastUpdate < CONFIG.PROGRESS_UPDATE_INTERVAL) return;
+                this.state.progress = (chunksProcessed / totalChunks) * 100;
+                this.updateProgressBar(this.state.progress);
+                this.state.lastUpdate = now;
+            },
+
+            updateProgressBar: function(progress) {
+                const progressBar = document.querySelector('.progress-bar');
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
+                const status = document.querySelector('.status-text');
+                if (status) {
+                    status.textContent = this.state.currentStatus;
+                }
+            },
+
+            renderEncoderPanel: function() {
+                const encoder = document.getElementById('encoder');
+                if (!encoder) return;
+
+                let html = `<h2 class="text-lg font-bold mb-4">Encrypt Data</h2>`;
+                html += `<div class="space-y-4">`;
+                html += `<textarea class="input-text-area" placeholder="Enter text to encrypt (optional)" oninput="ZeroDeadDrop.handleTextChange(event)" rows="5">${this.state.textInput}</textarea>`;
+                html += `<p id="charCount" class="text-sm text-muted">Characters: ${this.state.textInput.length.toLocaleString()} / ${CONFIG.MAX_TEXT_LENGTH.toLocaleString()}</p>`;
+                html += `<button class="button-primary" onclick="ZeroDeadDrop.clearTextInput()" aria-label="Clear text input">Clear Text</button>`;
+                html += `<label for="file-upload" class="button-primary w-full">Choose Files</label>`;
+                html += `<input type="file" id="file-upload" multiple onchange="ZeroDeadDrop.handleFileChange(event)" style="display: none;">`;
+                html += `<div class="space-y-2">`;
+                this.state.files.forEach((file, index) => {
+                    html += `<div class="list-item">
+                        <span class="list-item-content">${this.escapeHtml(file.name)} (${this.formatBytes(file.size)})</span>
+                        <div class="list-item-actions">
+                            <button class="button-primary" onclick="ZeroDeadDrop.removeFile(${index})" aria-label="Remove file">Remove</button>
+                        </div>
+                    </div>`;
+                });
+                html += `</div>`;
+                const totalSize = this.state.files.reduce((acc, f) => acc + f.size, 0) + (this.state.textInput.length * 2);
+                html += `<p class="text-sm text-muted">Total size: ${this.formatBytes(totalSize)} / ${this.formatBytes(CONFIG.MAX_TOTAL_SIZE)}</p>`;
+                html += `<div class="passphrase-container">
+                    <input type="${this.state.showPassphrase ? 'text' : 'password'}" class="input-text-area" value="${this.state.passphrase}" placeholder="Passphrase (min 8 chars)" oninput="ZeroDeadDrop.state.passphrase = this.value">
+                    <button class="button-primary" onclick="ZeroDeadDrop.togglePassphraseVisibility()" aria-label="Toggle passphrase visibility">${this.state.showPassphrase ? 'Hide' : 'Show'}</button>
+                    <button class="button-primary" onclick="ZeroDeadDrop.generatePassphrase()" aria-label="Generate passphrase">Generate</button>
+                </div>`;
+                if (this.state.showAdvancedSettings) {
+                    html += `<select class="input-text-area" onchange="ZeroDeadDrop.handleHashAlgorithmChange(event)">
+                        <option value="SHA-256" ${this.state.hashAlgorithm === 'SHA-256' ? 'selected' : ''}>SHA-256</option>
+                        <option value="SHA-512" ${this.state.hashAlgorithm === 'SHA-512' ? 'selected' : ''}>SHA-512</option>
+                    </select>`;
+                    html += `<input type="number" class="input-text-area" value="${this.state.iterations}" placeholder="PBKDF2 Iterations" oninput="ZeroDeadDrop.handleIterationsChange(event)">`;
+                }
+                html += `<button class="button-primary" onclick="ZeroDeadDrop.toggleAdvancedSettings()" aria-label="Toggle advanced settings">${this.state.showAdvancedSettings ? 'Hide' : 'Show'} Advanced</button>`;
+                html += `<div class="checkbox-option">
+                    <input type="checkbox" ${this.state.autoDownloadBundle ? 'checked' : ''} onchange="ZeroDeadDrop.handleAutoDownloadBundleChange(event)">
+                    <label>Auto Download Bundle</label>
+                </div>`;
+                html += `<div class="checkbox-option">
+                    <input type="checkbox" ${this.state.autoDownloadManifest ? 'checked' : ''} onchange="ZeroDeadDrop.handleAutoDownloadManifestChange(event)">
+                    <label>Auto Download Manifest</label>
+                </div>`;
+                html += `<div class="checkbox-option">
+                    <input type="checkbox" ${this.state.combineOutput ? 'checked' : ''} onchange="ZeroDeadDrop.handleCombineOutputChange(event)">
+                    <label>Combine Manifest and Bundle</label>
+                </div>`;
+                html += `<button class="button-primary w-full" onclick="ZeroDeadDrop.handleEncode()" ${this.state.isEncoding ? 'disabled' : ''} aria-label="Start encryption">Start Encryption</button>`;
+                if (this.state.isEncoding) {
+                    html += `<div class="flex items-center">
+                        <div class="loading-spinner"></div>
+                        <span class="status-text">${this.state.currentStatus}</span>
+                    </div>`;
+                    html += `<div style="background: var(--border-color); height: 6px; border-radius: 3px;">
+                        <div class="progress-bar" style="width: ${this.state.progress}%"></div>
+                    </div>`;
+                    html += `<button class="button-primary" onclick="ZeroDeadDrop.cancelOperation()" aria-label="Cancel operation">Cancel</button>`;
+                }
+                if (this.state.manifest && this.state.chunkBundle) {
+                    if (this.state.manifest) {
+                        html += `<h3 class="font-bold mt-4">Manifest</h3>`;
+                        if (this.state.showManifestView) {
+                            html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${this.escapeHtml(JSON.stringify(this.state.manifest, null, 2))}</pre>`;
+                        }
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.toggleManifestView()" aria-label="Toggle manifest view">${this.state.showManifestView ? 'Hide' : 'View'}</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.copyManifest()" aria-label="Copy manifest">Copy</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.downloadManifest()" aria-label="Download manifest">Download</button>`;
+                    }
+                    if (this.state.chunkBundle) {
+                        html += `<h3 class="font-bold mt-4">Bundle</h3>`;
+                        if (this.state.showBundleView) {
+                            html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${this.escapeHtml(JSON.stringify(this.state.chunkBundle, null, 2))}</pre>`;
+                        }
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.toggleBundleView()" aria-label="Toggle bundle view">${this.state.showBundleView ? 'Hide' : 'View'}</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.copyBundle()" aria-label="Copy bundle">Copy</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.downloadBundle()" aria-label="Download bundle">Download</button>`;
+                    }
+                    if (this.state.combineOutput) {
+                        html += `<h3 class="font-bold mt-4">Combined</h3>`;
+                        if (this.state.showCombinedView) {
+                            const combined = {manifest: this.state.manifest, bundle: this.state.chunkBundle};
+                            html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${this.escapeHtml(JSON.stringify(combined, null, 2))}</pre>`;
+                        }
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.toggleCombinedView()" aria-label="Toggle combined view">${this.state.showCombinedView ? 'Hide' : 'View'}</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.copyCombined()" aria-label="Copy combined">Copy</button>`;
+                        html += `<button class="button-primary" onclick="ZeroDeadDrop.downloadCombined()" aria-label="Download combined">Download</button>`;
+                    }
+                }
+                html += `</div>`;
+
+                encoder.innerHTML = html;
+            },
+
+            renderDecoderPanel: function() {
+                const decoder = document.getElementById('decoder');
+                if (!decoder) return;
+
+                let html = `<h2 class="text-lg font-bold mb-4">Decrypt Data</h2>`;
+                html += `<div class="space-y-4">`;
+                html += `<h3 class="font-bold">Combined (Optional)</h3>`;
+                html += `<label for="combined-upload" class="button-primary w-full">Upload Combined File</label>`;
+                html += `<input type="file" id="combined-upload" onchange="ZeroDeadDrop.handleCombinedFileChange(event)" style="display: none;">`;
+                if (this.state.combinedFile) {
+                    html += `<div class="list-item">
+                        <span class="list-item-content">${this.escapeHtml(this.state.combinedFile.name)}</span>
+                        <div class="list-item-actions">
+                            <button class="button-primary" onclick="ZeroDeadDrop.removeCombinedFile()" aria-label="Remove combined file">Remove</button>
+                        </div>
+                    </div>`;
+                }
+                html += `<textarea class="input-text-area" placeholder="Or paste combined JSON" oninput="ZeroDeadDrop.handleCombinedChange(event)" rows="5">${this.state.combinedInput}</textarea>`;
+                html += `<button class="button-primary" onclick="ZeroDeadDrop.importCombined()" aria-label="Import combined">Import Combined</button>`;
+                html += `<h3 class="font-bold">Chunk Bundle</h3>`;
+                html += `<label for="bundle-upload" class="button-primary w-full">Upload Bundle File</label>`;
+                html += `<input type="file" id="bundle-upload" onchange="ZeroDeadDrop.handleChunkBundleFileChange(event)" style="display: none;">`;
+                if (this.state.chunkBundleFile) {
+                    html += `<div class="list-item">
+                        <span class="list-item-content">${this.escapeHtml(this.state.chunkBundleFile.name)}</span>
+                        <div class="list-item-actions">
+                            <button class="button-primary" onclick="ZeroDeadDrop.removeChunkBundleFile()" aria-label="Remove bundle file">Remove</button>
+                        </div>
+                    </div>`;
+                }
+                html += `<textarea class="input-text-area" placeholder="Or paste bundle JSON" oninput="ZeroDeadDrop.handleChunkBundleChange(event)" rows="5">${this.state.chunkBundleInput}</textarea>`;
+                html += `<button class="button-primary" onclick="ZeroDeadDrop.importChunkBundle()" aria-label="Import bundle">Import Bundle</button>`;
+                if (this.state.encryptedChunksMap) {
+                    html += `<p class="text-success">✅ Imported ${this.state.encryptedChunksMap.size} chunks</p>`;
+                }
+                html += `<h3 class="font-bold">Manifest</h3>`;
+                html += `<label for="manifest-upload" class="button-primary w-full">Upload Manifest File</label>`;
+                html += `<input type="file" id="manifest-upload" onchange="ZeroDeadDrop.handleManifestFileChange(event)" style="display: none;">`;
+                if (this.state.manifestFile) {
+                    html += `<div class="list-item">
+                        <span class="list-item-content">${this.escapeHtml(this.state.manifestFile.name)}</span>
+                        <div class="list-item-actions">
+                            <button class="button-primary" onclick="ZeroDeadDrop.removeManifestFile()" aria-label="Remove manifest file">Remove</button>
+                        </div>
+                    </div>`;
+                }
+                html += `<textarea class="input-text-area" placeholder="Paste manifest JSON" oninput="ZeroDeadDrop.handleManifestChange(event)" rows="5">${this.state.manifestInput}</textarea>`;
+                html += `<button class="button-primary" onclick="ZeroDeadDrop.importManifest()" aria-label="Import manifest">Import Manifest</button>`;
+                if (this.state.manifestValid) {
+                    html += `<p class="text-success">✅ Manifest imported</p>`;
+                }
+                html += `<div class="passphrase-container">
+                    <input type="${this.state.showDecPassphrase ? 'text' : 'password'}" class="input-text-area" value="${this.state.decPassphrase}" placeholder="Passphrase" oninput="ZeroDeadDrop.handleDecPassphraseChange(event)">
+                    <button class="button-primary" onclick="ZeroDeadDrop.toggleDecPassphraseVisibility()" aria-label="Toggle decryption passphrase visibility">${this.state.showDecPassphrase ? 'Hide' : 'Show'}</button>
+                </div>`;
+                html += `<button class="button-primary w-full" onclick="ZeroDeadDrop.handleDecode()" ${this.state.isDecoding ? 'disabled' : ''} aria-label="Start decryption">Start Decryption</button>`;
+                if (this.state.isDecoding) {
+                    html += `<div class="flex items-center">
+                        <div class="loading-spinner"></div>
+                        <span class="status-text">${this.state.currentStatus}</span>
+                    </div>`;
+                    html += `<div style="background: var(--border-color); height: 6px; border-radius: 3px;">
+                        <div class="progress-bar" style="width: ${this.state.decProgress}%"></div>
+                    </div>`;
+                    html += `<button class="button-primary" onclick="ZeroDeadDrop.cancelOperation()" aria-label="Cancel operation">Cancel</button>`;
+                }
+                if (this.state.decodedFiles.length > 0) {
+                    html += `<h3 class="font-bold mt-4">Decoded Files</h3>`;
+                    this.state.decodedFiles.forEach((file, index) => {
+                        html += `<div class="list-item">
+                            <span class="list-item-content">${this.escapeHtml(file.name)} (${this.formatBytes(file.size)})</span>
+                            <div class="list-item-actions">
+                                <button class="button-primary" onclick="ZeroDeadDrop.downloadDecodedFile(${index})" aria-label="Download decoded file">Download</button>`;
+                        if (file.type.startsWith('text/')) {
+                            html += `<button class="button-primary" onclick="ZeroDeadDrop.toggleViewDecoded(${index})" aria-label="Toggle view decoded file">${this.state.viewedTexts[index]?.showing ? 'Hide' : 'View'}</button>`;
+                        }
+                        html += `</div>
+                        </div>`;
+                        if (this.state.viewedTexts[index]?.showing) {
+                            html += `<pre class="overflow-y-auto max-h-64 p-4 border rounded" style="background: var(--list-bg);">${this.escapeHtml(this.state.viewedTexts[index].text)}</pre>`;
+                        }
+                    });
+                    html += `<p class="text-sm">Purge in <span id="countdown">${this.state.remainingTime}</span> seconds</p>`;
+                    html += `<button class="button-primary" onclick="ZeroDeadDrop.handleCleanup()" aria-label="Purge now">Purge Now</button>`;
+                }
+                html += `</div>`;
+
+                decoder.innerHTML = html;
+                if (this.state.decodedFiles.length > 0) {
+                    this.updateCountdown();
+                }
+            },
+
+            initApp: function() {
+                this.boundResetInactivityTimer = this.resetInactivityTimer.bind(this);
+                
+                const root = document.getElementById('root');
+                root.innerHTML = `
+                    <div class="container">
+                        <div class="warning-banner">⚠️ Warning: This application has NOT been professionally audited. Use for non-critical data only.</div>
+                        <div class="warning-banner">⚠️ Warning: Do not input information you find in the decoding/decryption section unless you are 100% aware and trusting of the source to know what it contains.</div>
+                        <h1 class="hero-title text-4xl">ZeroDeadDrop</h1>
+                        <p class="tagline">A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data, Enabling Secure Offline Data Sharing Without Internet or Cellular Connectivity</p>
+                        <div class="flex justify-center space-x-4 mb-4">
+                            <button class="button-primary" onclick="ZeroDeadDrop.toggleInstructions()" aria-label="Toggle instructions modal">Instructions</button>
+                            <button class="button-primary" id="themeButton" onclick="ZeroDeadDrop.updateTheme()" aria-label="Toggle theme">${this.state.theme === 'dark' ? '☀️' : '🌙'}</button>
+                        </div>
+                        <div class="grid-layout">
+                            <div id="encoder" class="card"></div>
+                            <div id="decoder" class="card"></div>
+                        </div>
+                        <footer class="text-center text-muted mt-4">© 2025 ZeroDeadDrop (a project by Tuyen Evans)</footer>
+                    </div>
+                `;
+                document.documentElement.classList.toggle('dark', this.state.theme === 'dark');
+                this.renderEncoderPanel();
+                this.renderDecoderPanel();
+            }
+        };
+
+        window.ZeroDeadDrop = ZeroDeadDrop;
+        ZeroDeadDrop.initApp();
+    </script>
+</body>
+</html>
