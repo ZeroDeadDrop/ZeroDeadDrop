@@ -2,6 +2,10 @@ ZeroDeadDrop v1.0.0
 
 Stateless, zero-dependency, zero-server, offline AES-256-GCM encryption system.
 
+Here is a video of how to use it on X.
+
+https://x.com/TheRedDressNeo/status/1983261035172876334
+
 ## Overview
 ZeroDeadDrop is a browser-based encryption utility that operates fully offline.  
 It performs AES-256-GCM encryption and decryption entirely within the browser,  
