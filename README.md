@@ -11,7 +11,7 @@ ZeroDeadDrop is a browser-based encryption utility that operates fully offline.
 It performs AES-256-GCM encryption and decryption entirely within the browser,  
 requiring no internet connection, no servers, and no external libraries.
 
-The app is designed for ephemeral, private use — all data resides in memory only  
+The app is designed for ephemeral, private use all data resides in memory only  
 and self-erases after expiration or inactivity. It is compatible with Tor Browser  
 and all major desktop browsers.
 
@@ -37,7 +37,7 @@ ZeroDeadDrop is stateless. Once you close or reload the page, all session data i
 
 Security
 - AES-256-GCM with random salt and IV per chunk
-- PBKDF2-SHA256 with 300,000 iterations
+- PBKDF2-SHA256 with 600,000 iterations
 - Secure RNG via `crypto.getRandomValues()`
 - No `localStorage`, `sessionStorage`, cookies, or network calls
 - Strict CSP: `default-src 'none'`
