@@ -37,7 +37,7 @@ ZeroDeadDrop is stateless. Once you close or reload the page, all session data i
 
 Security
 - AES-256-GCM with random salt and IV per chunk
-- PBKDF2-SHA256 with 600,000 iterations
+- PBKDF2-SHA256 with 300,000 iterations
 - Secure RNG via `crypto.getRandomValues()`
 - No `localStorage`, `sessionStorage`, cookies, or network calls
 - Strict CSP: `default-src 'none'`
