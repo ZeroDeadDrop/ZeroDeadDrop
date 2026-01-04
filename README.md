@@ -58,24 +58,6 @@ Import manifest and bundle(s).
 Provide the matching credential (passphrase or private key).
 Download decrypted files immediately (auto-purge in 5 minutes).
 
-
-Note: 
-Large payloads (>500 MB) may temporarily pause the browser UI—this is normal Web Crypto behavior on a single thread. Wait for completion.
-
-Security Notes
-
-AES-256-GCM with unique salts/IVs per chunk
-
-Forward secrecy in asymmetric mode (ephemeral sender keys destroyed after use)
-
-Secure random via crypto.getRandomValues()
-
-No storage mechanisms (localStorage, IndexedDB, cookies)
-
-Aggressive memory sanitization on exit/inactivity
-
-Not professionally audited yet – use for non-critical data and review the source
-
 Disclaimer
 
 ZeroDeadDrop is provided "as is" without warranty of any kind. The author assumes no liability for data loss, security incidents, or misuse.
