@@ -8,8 +8,8 @@ Data exists only in memory and is automatically purged after 5 minutes of inacti
 It works seamlessly in modern desktop browsers (Chrome, Firefox, Edge) and Tor Browser (Standard and Safer modes).
 
 Repository: https://github.com/ZeroDeadDrop/ZeroDeadDrop
-Key Features
 
+Key Features
 
 🔒 Military-grade encryption: AES-256-GCM with per-chunk random salts and IVs
 
@@ -40,7 +40,9 @@ Why ZeroDeadDrop?
 In an era of increasing digital surveillance, true privacy requires eliminating trust in third parties. Most online tools rely on servers, dependencies, or accounts—each a potential point of compromise.
 ZeroDeadDrop removes these entirely. When you "send" encrypted data, you are actually sending instructions on how to reconstruct the original using a shared credential. The sensitive content itself never leaves your device unencrypted. Even if an adversary intercepts the outputs, they learn nothing without the credential.
 Privacy should be the default, not a premium feature reserved for high-risk users.
-Usage
+
+Usage:
+
 Download ZeroDeadDrop.html from the repository.
 Open the file directly in a modern browser (no installation required).
 
