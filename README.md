@@ -8,6 +8,7 @@ Data exists only in memory and is automatically purged after 5 minutes of inacti
 It works seamlessly in modern desktop browsers (Chrome, Firefox, Edge) and Tor Browser (Standard and Safer modes).
 
 Repository: https://github.com/ZeroDeadDrop/ZeroDeadDrop
+
 Video Demonstration: https://x.com/TheRedDressNeo/status/2008262289116520501?s=20
 
 Key Features
