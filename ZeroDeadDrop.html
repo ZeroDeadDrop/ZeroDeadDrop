@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="description" content="ZeroDeadDrop - Client-side file encryption with zero servers, zero data collection, and military-grade AES-256-GCM encryption">
+  <meta name="theme-color" content="#5D5CDE">
+  <meta name="author" content="ZeroDeadDrop@gmail.com">
+  <meta name="keywords" content="encryption, privacy, client-side, zero-knowledge, AES-256">
+  <meta property="og:title" content="ZeroDeadDrop - Secure File Encryption">
+  <meta property="og:description" content="Client-side encryption with zero servers and zero data collection">
+  <meta property="og:type" content="website">
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'none';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data:;
+    object-src 'none';
+    base-uri 'none';
+  ">
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48dGV4dCB5PSIuOWVtIiBmb250LXNpemU9IjkwIj7wn5SSPC90ZXh0Pjwvc3ZnPg==">
+  <title>ZeroDeadDrop - Secure File Encryption</title>
+  <style>
+    :root {
+      --primary-color: #5D5CDE;
+      --background-color: #F8F9FA;
+      --card-bg: #fff;
+      --text-color: #333;
+      --text-muted: #9ca3af;
+      --border-color: #d1d5db;
+      --input-bg: #fff;
+      --input-border: #d1d5db;
+      --button-text: #fff;
+      --success-text: #16a34a;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --info-bg: #eff6ff;
+      --info-border: #bfdbfe;
+      --spinner-border: #e5e7eb;
+      --spinner-top: #5D5CDE;
+      --list-bg: #fff;
+      --list-border: #d1d5db;
+      --accent-glow: rgba(93,92,222,0.1);
+      --gradient-start: #5D5CDE;
+      --gradient-end: #4F4EC6;
+      --header-color: #000;
+      --security-green: #10b981;
+    }
+    .dark {
+      --background-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e5e5e5;
+      --text-muted: #d1d5db;
+      --border-color: #374151;
+      --input-bg: #27272a;
+      --input-border: #4b5563;
+      --success-text: #10b981;
+      --error-bg: #7f1d1d;
+      --error-border: #ef4444;
+      --info-bg: #1e3a8a;
+      --info-border: #3b82f6;
+      --spinner-border: #27272a;
+      --list-bg: #27272a;
+      --list-border: #4b5563;
+      --accent-glow: rgba(93,92,222,0.2);
+      --gradient-end: #7C7CFF;
+      --header-color: #fff;
+      --security-green: #10b981;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+      transition: all .3s;
+    }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 1rem 3rem; }
+    .grid-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 2rem; }
+    @media (min-width: 1024px) { .grid-layout { grid-template-columns: repeat(2, 1fr); } }
+    .card {
+      background: var(--card-bg);
+      padding: 2rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,.15);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+    }
+    .loading-spinner {
+      border: 4px solid var(--spinner-border);
+      border-top: 4px solid var(--spinner-top);
+      border-radius: 50%;
+      width: 20px; height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: .5rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .input-text-area {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--input-border);
+      border-radius: .75rem;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 16px;
+      resize: vertical;
+      font-family: inherit;
+    }
+    .input-text-area:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+      outline: none;
+    }
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      margin-bottom: .75rem;
+      border: 2px solid var(--list-border);
+      border-radius: .75rem;
+      background: var(--list-bg);
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .list-item-content { flex: 1; min-width: 0; word-break: break-word; }
+    .list-item-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .hero-title { font-weight: 900; text-align: center; color: var(--header-color); margin-bottom: .5rem; }
+    .tagline { font-size: 1.1rem; font-weight: 500; text-align: center; color: var(--text-muted); margin: .5rem auto 2rem; max-width: 900px; }
+    .button-primary {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: var(--button-text);
+      border: none;
+      padding: 1rem;
+      border-radius: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      min-height: 56px;
+    }
+    .button-primary:hover:not(:disabled) { opacity: .9; transform: translateY(-2px); }
+    .button-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .progress-bar {
+      background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+      height: 8px;
+      border-radius: 4px;
+      transition: width .3s;
+    }
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .75rem;
+      border: 2px solid var(--border-color);
+      border-radius: .5rem;
+      margin-bottom: .75rem;
+    }
+    .checkbox-option input { width: 1.5rem; height: 1.5rem; }
+    .warning-banner {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      border-radius: .75rem;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      color: #856404;
+    }
+    .dark .warning-banner { background: #664d03; color: #ffecb5; }
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      max-width: 90%;
+      max-height: 90vh;
+      width: 90%;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-color);
+    }
+    .tab-nav {
+      display: flex;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--list-bg);
+      margin: 1rem -2rem 0;
+      padding: 0 2rem;
+    }
+    .tab-button {
+      padding: .75rem 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .tab-button.active {
+      border-bottom: 2px solid #14b8a6;
+      color: #14b8a6;
+      background: var(--card-bg);
+    }
+    .hidden { display: none !important; }
+    .space-y-4 > * + * { margin-top: 1rem; }
+    .space-y-6 > * + * { margin-top: 1.25rem; }
+    .w-full { width: 100%; }
+    .text-center { text-align: center; }
+    .font-bold { font-weight: 700; }
+    .text-xs { font-size: 0.875rem; }
+    .text-sm { font-size: 0.875rem; }
+    .text-lg { font-size: 1.125rem; }
+    .text-2xl { font-size: 1.5rem; }
+    .text-4xl { font-size: 2.25rem; }
+    .text-5xl { font-size: 3rem; }
+    .p-4 { padding: 1rem; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mt-4 { margin-top: 1rem; }
+    .grid { display: grid; }
+    .grid-cols-3 { grid-template-columns: repeat(3,1fr); }
+    .grid-cols-2 { grid-template-columns: repeat(2,1fr); }
+    .gap-4 { gap: 1rem; }
+    .list-disc { list-style-type: disc; }
+    .list-decimal { list-style-type: decimal; }
+    .pl-6 { padding-left: 1.5rem; }
+    .overflow-y-auto { overflow-y: auto; }
+    .max-h-64 { max-height: 16rem; }
+    .timer-red { color: red; font-weight: bold; }
+    .flex { display: flex; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .text-success { color: var(--success-text); }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--list-bg);
+      padding: 1rem;
+      border-radius: .75rem;
+      border: 1px solid var(--border-color);
+      margin: 1rem 0;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    .passphrase-container {
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .passphrase-container input,
+    .passphrase-container textarea { flex: 1; min-width: 200px; }
+    .multi-pub-container { margin-top: 1rem; }
+    .multi-pub-item {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: .5rem;
+      align-items: start;
+    }
+    .multi-pub-item textarea { flex: 1; }
+    .multi-pub-item button { margin-top: 1.75rem; }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    /* Mobile improvements */
+    @media (max-width: 768px) {
+      .grid-layout { gap: 1.5rem; }
+      .card { padding: 1.5rem; }
+      .hero-title { font-size: 2.5rem; }
+      .tagline { font-size: 1rem; padding: 0 1rem; }
+      .button-primary { min-height: 56px; font-size: 1.1rem; padding: 1.2rem; }
+      .input-text-area { font-size: 1.1rem; padding: 1.2rem; }
+      .passphrase-container { flex-direction: column; align-items: stretch; }
+      .passphrase-container input, .passphrase-container textarea { width: 100%; min-width: unset; }
+      .multi-pub-item { flex-direction: column; }
+      .multi-pub-item button { margin-top: .75rem; width: 100%; }
+      .checkbox-option { padding: 1rem; }
+      .modal-content { padding: 1.5rem; }
+      .progress-bar { height: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#121212;color:#fff">
+    <div style="text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+      <p>Loading ZeroDeadDrop...</p>
+    </div>
+  </div>
+  <div id="root" style="display:none"></div>
+  <div id="instructionsModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" onclick="Z.toggleInstructions()">×</button>
+      <div id="instructionsContent"></div>
+    </div>
+  </div>
+  <script>
+    const C = {
+      CHUNK_SIZE: 4194304,
+      MAX_TEXT_LENGTH: 1000000,
+      MAX_TOTAL_SIZE: 1073741824,
+      MAX_FILE_SIZE: 524288000,
+      PURGE_DELAY: 300,
+      INACTIVITY_TIMEOUT: 300,
+      YIELD_INTERVAL: 3,
+      BATCH_THRESHOLD: 500,
+      EST_MAX_JSON_SIZE: 536870912,
+      MAX_ITERATIONS: 10000000,
+      MIN_ITERATIONS: 100000
+    };
+
+    const Scrub = {
+      junk: [], junkSize: 0,
+      targetPressure: 180 * 1024 * 1024,
+
+      wipe(obj) {
+        if (!obj) return;
+        if (obj instanceof ArrayBuffer || obj instanceof Uint8Array) {
+          const view = new Uint8Array(obj);
+          view.fill(0xAA);
+          view.fill(0x55);
+          view.fill(0x00);
+          view.fill(0xFF);
+          view.fill(0x00);
+        }
+        obj = null;
+      },
+
+      keepPressure() {
+        try {
+          while (this.junkSize < this.targetPressure) {
+            const chunk = new Uint8Array(10 * 1024 * 1024);
+            crypto.getRandomValues(chunk);
+            this.junk.push(chunk);
+            this.junkSize += chunk.length;
+          }
+        } catch (e) {}
+      },
+
+      nukeEverything() {
+        Z.s.passphrase = Z.s.decPassphrase = Z.s.textInput = Z.s.receiverPubInput = Z.s.privateKeyInput = '';
+        Z.s.files = []; Z.s.decodedFiles = []; Z.s.manifest = null; Z.s.parsedManifest = null;
+        Z.s.chunkBundleBatches = null;
+        if (Z.s.encryptedChunksMap) Z.s.encryptedChunksMap.clear();
+        this.junk.forEach(arr => {
+          arr.fill(0xAA); arr.fill(0x55); arr.fill(0x00); arr.fill(0xFF); arr.fill(0x00);
+        });
+        try {
+          const apocalypse = new Uint8Array(250 * 1024 * 1024);
+          crypto.getRandomValues(apocalypse);
+          apocalypse.fill(0xAA); apocalypse.fill(0x55); apocalypse.fill(0x00); apocalypse.fill(0xFF); apocalypse.fill(0x00);
+        } catch (e) {}
+        Z.cleanBlobs();
+        document.body.innerHTML = '';
+        location.href = 'about:blank';
+      }
+    };
+
+    Scrub.keepPressure();
+    setInterval(() => Scrub.keepPressure(), 8000);
+
+    function showAlert(m) {
+      const d = document.createElement('div');
+      d.className = 'modal-overlay';
+      d.innerHTML = `<div class="modal-content" style="max-width:400px"><p style="margin-bottom:1rem">${m}</p><button type="button" class="button-primary w-full">OK</button></div>`;
+      d.querySelector('button').onclick = () => d.remove();
+      document.body.appendChild(d);
+    }
+
+    function showConfirm(m, cb) {
+      const d = document.createElement('div');
+      d.className = 'modal-overlay';
+      d.innerHTML = `<div class="modal-content" style="max-width:400px"><p style="margin-bottom:1rem">${m}</p><div class="flex" style="gap:.5rem"><button type="button" class="button-primary w-full">Cancel</button><button type="button" class="button-primary w-full">OK</button></div></div>`;
+      const btns = d.querySelectorAll('button');
+      btns[0].onclick = () => d.remove();
+      btns[1].onclick = () => { d.remove(); cb(); };
+      document.body.appendChild(d);
+    }
+
+    async function hkdfDeriveKey(sharedSecret) {
+      const hkdfKey = await crypto.subtle.importKey('raw', sharedSecret, 'HKDF', false, ['deriveKey']);
+      return await crypto.subtle.deriveKey(
+        { name: 'HKDF', hash: 'SHA-384', salt: new Uint8Array(0), info: new Uint8Array(0) },
+        hkdfKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    const Z = {
+      s: {
+        theme: 'dark',
+        showInstructionsModal: false,
+        textInput: '',
+        files: [],
+        passphrase: '',
+        iterations: 300000,
+        hashAlgorithm: 'SHA-256',
+        isEncoding: false,
+        manifest: null,
+        parsedManifest: null,
+        isAsymmetric: false,
+        chunkBundleBatches: null,
+        progress: 0,
+        manifestInput: '',
+        decPassphrase: '',
+        privateKeyInput: '',
+        isDecoding: false,
+        decProgress: 0,
+        decodedFiles: [],
+        chunkBundleFiles: [],
+        chunkBundleInput: '',
+        manifestFile: null,
+        encryptedChunksMap: null,
+        showPassphrase: false,
+        showDecPassphrase: false,
+        showPrivateKey: false,
+        blobUrls: [],
+        autoDownloadBundle: true,
+        autoDownloadManifest: true,
+        activeTab: 'overview',
+        showManifestView: false,
+        showBundleView: false,
+        showAdvancedSettings: true,
+        purgeTimer: null,
+        inactivityTimer: null,
+        sessionStartTime: performance.now(),
+        remainingTime: C.PURGE_DELAY,
+        manifestValid: false,
+        manifestJson: '',
+        viewedTexts: {},
+        combineOutput: true,
+        showCombinedView: false,
+        combinedFile: null,
+        combinedInput: '',
+        currentStatus: '',
+        plausibleDeniability: false,
+        asymmetricMode: false,
+        multiRecipient: false,
+        receiverPubKeys: [''],
+        curve: 'P-384',
+        compress: false,
+        receiverPubInput: ''
+      },
+
+      // Utility functions
+      rid(n = 16) {
+        const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        const a = new Uint8Array(n);
+        crypto.getRandomValues(a);
+        return Array.from(a, x => c[x % c.length]).join('');
+      },
+
+      fmtB(b) {
+        if (b === 0) return '0 B';
+        const k = 1024, s = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(b) / Math.log(k));
+        return (b / Math.pow(k, i)).toFixed(2) + ' ' + s[i];
+      },
+
+      ab2b64(arrayBuffer) {
+        const uint8Array = new Uint8Array(arrayBuffer);
+        const chunkSize = 0x8000;
+        let str = '';
+        for (let i = 0; i < uint8Array.length; i += chunkSize) {
+          str += String.fromCharCode.apply(null, uint8Array.subarray(i, i + chunkSize));
+        }
+        return btoa(str);
+      },
+
+      b642ab(b64) {
+        const str = atob(b64);
+        const len = str.length;
+        const uint8Array = new Uint8Array(len);
+        for (let i = 0; i < len; i++) uint8Array[i] = str.charCodeAt(i);
+        return uint8Array;
+      },
+
+      a2b64(a) {
+        return this.ab2b64(a);
+      },
+
+      generateLargeRandom(size) {
+        const buf = new Uint8Array(size);
+        const maxChunk = 65536;
+        for (let offset = 0; offset < size; offset += maxChunk) {
+          const chunkSize = Math.min(maxChunk, size - offset);
+          crypto.getRandomValues(new Uint8Array(buf.buffer, offset, chunkSize));
+        }
+        return buf;
+      },
+
+      base32Encode(bytes) {
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+        let output = '';
+        let buffer = 0;
+        let bits = 0;
+        for (const b of bytes) {
+          buffer = (buffer << 8) | b;
+          bits += 8;
+          while (bits >= 5) {
+            bits -= 5;
+            output += alphabet[(buffer >> bits) & 0x1f];
+          }
+        }
+        if (bits > 0) {
+          output += alphabet[(buffer << (5 - bits)) & 0x1f];
+        }
+        while (output.length % 8 !== 0) output += '=';
+        return output;
+      },
+
+      valJSON(str, type) {
+        if (!str || !str.trim()) throw new Error('Empty JSON');
+        try {
+          const p = JSON.parse(str);
+          if (type === 'manifest') {
+            if (!p.manifestId || !p.encodedItems) throw new Error("Invalid manifest");
+            if (p.keyType === 'ecdh') {
+              if (!p.curve || !p.recipients || !p.recipients.length) throw new Error("Invalid ECDH manifest");
+            } else {
+              if (!p.iterations || !p.hashAlgorithm) throw new Error("Missing PBKDF2 params");
+            }
+          } else if (type === 'bundle') {
+            if (!p.chunks || !p.chunks.length) throw new Error("Invalid bundle");
+            for (let i = 0; i < Math.min(p.chunks.length, 5); i++) {
+              if (!p.chunks[i].chunkId || !p.chunks[i].cipher || !p.chunks[i].iv) throw new Error("Chunk " + i + " malformed");
+            }
+          }
+          return p;
+        } catch (e) {
+          throw new Error("JSON error: " + e.message);
+        }
+      },
+
+      esc(t) {
+        if (typeof t !== 'string') t = '';
+        return t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#x27;').replace(/`/g, '&#x60;');
+      },
+
+      // Crypto primitives
+      async genKeyPair(curve = 'P-384') {
+        return await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: curve }, true, ['deriveBits']);
+      },
+
+      async exportKey(key, isPublic = true) {
+        const format = isPublic ? 'spki' : 'pkcs8';
+        const exported = await crypto.subtle.exportKey(format, key);
+        return this.ab2b64(exported);
+      },
+
+      async importKey(b64, curve = 'P-384', isPublic = true) {
+        const buf = this.b642ab(b64);
+        const format = isPublic ? 'spki' : 'pkcs8';
+        return await crypto.subtle.importKey(format, buf.buffer, { name: 'ECDH', namedCurve: curve }, true, isPublic ? [] : ['deriveBits']);
+      },
+
+      async deriveSharedKey(privateKey, publicKey) {
+        const sharedBits = await crypto.subtle.deriveBits({ name: 'ECDH', public: publicKey }, privateKey, 384);
+        return await hkdfDeriveKey(sharedBits);
+      },
+
+      async deriveKey(passphrase, salt, iter, hash) {
+        const enc = new TextEncoder();
+        const km = await crypto.subtle.importKey("raw", enc.encode(passphrase), "PBKDF2", false, ["deriveKey"]);
+        return crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt.buffer, iterations: iter, hash }, km, { name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+      },
+
+      async encChunk(buf, credential, isAsymmetric = false) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        let key = credential;
+        let salt;
+        if (!isAsymmetric) {
+          salt = crypto.getRandomValues(new Uint8Array(16));
+          key = await this.deriveKey(credential, salt, Z.s.iterations, Z.s.hashAlgorithm);
+        }
+        const cipher = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, buf);
+        const ret = { cipher: this.ab2b64(cipher), iv: this.a2b64(iv) };
+        if (salt) ret.salt = this.a2b64(salt);
+        Scrub.wipe(buf);
+        return ret;
+      },
+
+      async compressBlob(blob) {
+        if (!window.CompressionStream) return blob;
+        const cs = new CompressionStream('gzip');
+        const writer = cs.writable.getWriter();
+        writer.write(await blob.arrayBuffer());
+        writer.close();
+        const chunks = [];
+        const reader = cs.readable.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        return new Blob(chunks);
+      },
+
+      async decompressBuf(buf) {
+        if (!window.DecompressionStream) throw new Error("Decompression not supported in this browser");
+        const ds = new DecompressionStream('gzip');
+        const writer = ds.writable.getWriter();
+        writer.write(buf);
+        writer.close();
+        const chunks = [];
+        const reader = ds.readable.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        return new Uint8Array(await new Blob(chunks).arrayBuffer());
+      },
+
+      cleanBlobs() {
+        this.s.blobUrls.forEach(u => URL.revokeObjectURL(u));
+        this.s.blobUrls = [];
+      },
+
+      // UI helpers
+      updateTheme() {
+        this.s.theme = this.s.theme === 'light' ? 'dark' : 'light';
+        document.documentElement.classList.toggle('dark', this.s.theme === 'dark');
+        const b = document.getElementById('themeBtn');
+        if (b) b.innerHTML = this.s.theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+      },
+
+      toggleInstructions() {
+        this.s.showInstructionsModal = !this.s.showInstructionsModal;
+        document.getElementById('instructionsModal').classList.toggle('hidden', !this.s.showInstructionsModal);
+        if (this.s.showInstructionsModal) this.renderInstr();
+        this.resetInact();
+      },
+
+      async generateKeypairUI() {
+        try {
+          const kp = await this.genKeyPair();
+          const pub = await this.exportKey(kp.publicKey);
+          const priv = await this.exportKey(kp.privateKey, false);
+          const d = document.createElement('div');
+          d.className = 'modal-overlay';
+          d.innerHTML = `
+            <div class="modal-content" style="max-width:700px">
+              <button class="modal-close" onclick="this.parentNode.parentNode.remove()">×</button>
+              <h2 class="text-2xl font-bold mb-4 text-center">Asymmetric Keypair Generated (P-384)</h2>
+              <p class="text-center mb-4">Do this <strong>ONCE</strong> and keep the private key forever.</p>
+              <div class="space-y-6">
+                <div>
+                  <h3 class="font-bold mb-2">Public Key — Share with senders</h3>
+                  <textarea class="input-text-area w-full" rows="8" readonly>${pub}</textarea>
+                  <button type="button" class="button-primary w-full mt-2" onclick="Z.copyClip(this.previousElementSibling.value,'Public key copied')">Copy Public Key</button>
+                </div>
+                <div>
+                  <h3 class="font-bold mb-2">Private Key — KEEP SECRET FOREVER</h3>
+                  <textarea class="input-text-area w-full" rows="8" readonly>${priv}</textarea>
+                  <button type="button" class="button-primary w-full mt-2" onclick="Z.copyClip(this.previousElementSibling.value,'Private key copied')">Copy Private Key</button>
+                </div>
+              </div>
+              <div class="warning-banner mt-4">Lose your private key = permanently lose access to all files encrypted for you.</div>
+            </div>`;
+          document.body.appendChild(d);
+        } catch (e) {
+          showAlert('Keypair generation failed: ' + e.message);
+        }
+      },
+
+      updateCharCount() {
+        const el = document.getElementById('charCount');
+        if (el) el.textContent = `Chars: ${this.s.textInput.length.toLocaleString()} / ${C.MAX_TEXT_LENGTH.toLocaleString()}`;
+      },
+
+      updateTotalSize() {
+        const el = document.getElementById('totalSize');
+        if (el) {
+          const textSize = new TextEncoder().encode(this.s.textInput).length;
+          const fileSize = this.s.files.reduce((a, f) => a + f.size, 0);
+          const total = fileSize + textSize;
+          el.textContent = `Total: ${this.fmtB(total)} / ${this.fmtB(C.MAX_TOTAL_SIZE)}`;
+        }
+      },
+
+      // Input handlers
+      handleTextChange(e) {
+        const t = e.target.value;
+        if (t.length > C.MAX_TEXT_LENGTH) {
+          showAlert("Text exceeds limit");
+          e.target.value = this.s.textInput;
+          return;
+        }
+        this.s.textInput = t;
+        this.updateCharCount();
+        this.updateTotalSize();
+        this.resetInact();
+      },
+
+      handleFileChange(e) {
+        if (!e.target.files || !e.target.files.length) return;
+        const nf = Array.from(e.target.files);
+        const over = nf.filter(f => f.size > C.MAX_FILE_SIZE);
+        if (over.length) {
+          showAlert(`Files exceed ${this.fmtB(C.MAX_FILE_SIZE)}: ${over.map(f => this.esc(f.name)).join(', ')}`);
+          e.target.value = '';
+          return;
+        }
+        const cur = this.s.files.reduce((a, f) => a + f.size, 0);
+        const ns = nf.reduce((a, f) => a + f.size, 0);
+        if (cur + ns > C.MAX_TOTAL_SIZE) {
+          showAlert("Total exceeds 1GB");
+          e.target.value = '';
+          return;
+        }
+        this.s.files = this.s.files.concat(nf);
+        e.target.value = '';
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      removeFile(i) {
+        this.s.files.splice(i, 1);
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      clearText() {
+        this.s.textInput = '';
+        const ta = document.querySelector('#encoder textarea');
+        if (ta) ta.value = '';
+        this.updateCharCount();
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      toggleShowPass() {
+        this.s.showPassphrase = !this.s.showPassphrase;
+        const inp = document.querySelector('#encoder .sym-passphrase input');
+        if (inp) inp.type = this.s.showPassphrase ? 'text' : 'password';
+        this.resetInact();
+      },
+
+      toggleShowDecPass() {
+        this.s.showDecPassphrase = !this.s.showDecPassphrase;
+        const inp = document.querySelector('#decoder .sym-passphrase input');
+        if (inp) inp.type = this.s.showDecPassphrase ? 'text' : 'password';
+        this.resetInact();
+      },
+
+      toggleShowPrivate() {
+        this.s.showPrivateKey = !this.s.showPrivateKey;
+        const ta = document.querySelector('#decoder .private-key-input');
+        if (ta) ta.style.fontFamily = this.s.showPrivateKey ? 'inherit' : 'monospace';
+        this.resetInact();
+      },
+
+      genPass() {
+        this.s.passphrase = this.rid(24);
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      // View toggles
+      toggleManView() {
+        try {
+          if (!this.s.showManifestView && this.s.manifest) {
+            const size = JSON.stringify(this.s.manifest).length;
+            if (size > 10000000) {
+              showAlert("Manifest too large to view. Download instead.");
+              return;
+            }
+          }
+          this.s.showManifestView = !this.s.showManifestView;
+          this.renderEnc();
+          this.resetInact();
+        } catch (e) { showAlert('Error displaying manifest: ' + e.message); }
+      },
+
+      toggleBunView() {
+        try {
+          if (!this.s.showBundleView && this.s.chunkBundleBatches) {
+            if (this.s.chunkBundleBatches.length > 1) {
+              showAlert("View not supported for batched bundles - use Download.");
+              return;
+            }
+            const size = JSON.stringify(this.s.chunkBundleBatches[0]).length;
+            if (size > 10000000) {
+              showAlert("Bundle too large to view. Download instead.");
+              return;
+            }
+          }
+          this.s.showBundleView = !this.s.showBundleView;
+          this.renderEnc();
+          this.resetInact();
+        } catch (e) { showAlert('Error displaying bundle: ' + e.message); }
+      },
+
+      toggleCombView() {
+        try {
+          if (!this.s.showCombinedView && this.s.manifest && this.s.chunkBundleBatches) {
+            if (this.s.chunkBundleBatches.length > 1) {
+              showAlert("Combined view not available for batched data.");
+              return;
+            }
+            const comb = { manifest: this.s.manifest, bundle: this.s.chunkBundleBatches[0] };
+            const size = JSON.stringify(comb).length;
+            if (size > 10000000) {
+              showAlert("Combined data too large to view. Download instead.");
+              return;
+            }
+          }
+          this.s.showCombinedView = !this.s.showCombinedView;
+          this.renderEnc();
+          this.resetInact();
+        } catch (e) { showAlert('Error displaying combined: ' + e.message); }
+      },
+
+      // Mode toggles
+      toggleAsymMode(e) {
+        this.s.asymmetricMode = e.target.checked;
+        if (this.s.asymmetricMode) {
+          this.s.plausibleDeniability = false;
+          this.s.passphrase = '';
+        }
+        this.renderEnc();
+        this.renderDec();
+        this.resetInact();
+      },
+
+      toggleMultiRecipient(e) {
+        this.s.multiRecipient = e.target.checked;
+        if (!this.s.multiRecipient) this.s.receiverPubKeys = [''];
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      addRecipient() {
+        this.s.receiverPubKeys.push('');
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      removeRecipient(i) {
+        this.s.receiverPubKeys.splice(i, 1);
+        if (this.s.receiverPubKeys.length === 0) this.s.receiverPubKeys = [''];
+        this.renderEnc();
+        this.resetInact();
+      },
+
+      handleReceiverPubKeyChange(i, e) {
+        this.s.receiverPubKeys[i] = e.target.value;
+        this.resetInact();
+      },
+
+      handleReceiverPubChange(e) {
+        this.s.receiverPubInput = e.target.value;
+        this.resetInact();
+      },
+
+      handlePassChange(e) {
+        this.s.passphrase = e.target.value;
+        this.resetInact();
+      },
+
+      handlePrivateKeyChange(e) {
+        this.s.privateKeyInput = e.target.value;
+        this.resetInact();
+      },
+
+      handleDecPassChange(e) {
+        this.s.decPassphrase = e.target.value;
+        this.resetInact();
+      },
+
+      handleIterChange(e) {
+        const val = parseInt(e.target.value);
+        if (isNaN(val)) this.s.iterations = 300000;
+        else if (val > C.MAX_ITERATIONS) {
+          showAlert("Iterations capped at 10M to prevent browser freeze");
+          this.s.iterations = C.MAX_ITERATIONS;
+        } else if (val < C.MIN_ITERATIONS) {
+          showAlert("Minimum 100k iterations recommended");
+          this.s.iterations = C.MIN_ITERATIONS;
+        } else this.s.iterations = val;
+        this.resetInact();
+      },
+
+      handleHashChange(e) { this.s.hashAlgorithm = e.target.value; this.resetInact(); },
+      handleAutoBunChange(e) { this.s.autoDownloadBundle = e.target.checked; this.resetInact(); },
+      handleAutoManChange(e) { this.s.autoDownloadManifest = e.target.checked; this.resetInact(); },
+      handleCombOutChange(e) { this.s.combineOutput = e.target.checked; this.resetInact(); },
+      handlePDMChange(e) {
+        this.s.plausibleDeniability = e.target.checked;
+        if (e.target.checked && this.s.asymmetricMode) {
+          this.s.plausibleDeniability = false;
+          showAlert("Plausible Deniability not available in Asymmetric Mode");
+        }
+        this.resetInact();
+      },
+      handleCompressChange(e) { this.s.compress = e.target.checked; this.resetInact(); },
+
+      checkStrength(p) {
+        if (p.length < 12) return 'weak';
+        if (/[a-zA-Z]/.test(p) && /\d/.test(p) && /[^a-zA-Z0-9]/.test(p)) return 'strong';
+        return 'medium';
+      },
+
+      estSize(tc) { return tc * C.CHUNK_SIZE * 1.33 + 10000; },
+
+      async copyClip(txt, okMsg, errMsg = "Copy failed") {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(txt);
+            showAlert(okMsg);
+            return;
+          } catch (e) {}
+        }
+        const ta = document.createElement('textarea');
+        ta.value = txt;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand('copy');
+          showAlert(okMsg);
+        } catch (e) {
+          showAlert(errMsg);
+        }
+        document.body.removeChild(ta);
+      },
+
+      async copyManifest() {
+        if (!this.s.manifest) return showAlert("No manifest");
+        const size = JSON.stringify(this.s.manifest).length;
+        if (size > 10000000) return showAlert("Manifest too large for clipboard. Download instead.");
+        await this.copyClip(JSON.stringify(this.s.manifest, null, 2), "Manifest copied to clipboard");
+      },
+
+      async copyBundle() {
+        if (!this.s.chunkBundleBatches) return showAlert("No bundle");
+        if (this.s.chunkBundleBatches.length > 1) return showAlert("Copy not supported for batched bundles.");
+        const size = JSON.stringify(this.s.chunkBundleBatches[0]).length;
+        if (size > 10000000) return showAlert("Bundle too large for clipboard.");
+        await this.copyClip(JSON.stringify(this.s.chunkBundleBatches[0], null, 2), "Bundle copied to clipboard");
+      },
+
+      async copyCombined() {
+        if (!this.s.manifest || !this.s.chunkBundleBatches) return showAlert("No data");
+        if (this.s.chunkBundleBatches.length > 1) return showAlert("Copy not supported for batched data.");
+        const comb = { manifest: this.s.manifest, bundle: this.s.chunkBundleBatches[0] };
+        const size = JSON.stringify(comb).length;
+        if (size > 10000000) return showAlert("Combined too large for clipboard.");
+        await this.copyClip(JSON.stringify(comb, null, 2), "Combined copied to clipboard");
+      },
+
+      dlBundle() {
+        if (!this.s.chunkBundleBatches) return;
+        this.s.chunkBundleBatches.forEach((b, i) => {
+          const blob = new Blob([JSON.stringify(b, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = this.s.chunkBundleBatches.length > 1 ? `zd_bundle_part${i}.json` : "zd_bundle.json";
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 10000);
+        });
+      },
+
+      dlManifest() {
+        if (!this.s.manifest) return;
+        const blob = new Blob([JSON.stringify(this.s.manifest, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "zd_manifest.json";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      },
+
+      dlCombined() {
+        if (this.s.chunkBundleBatches?.length !== 1) return;
+        const comb = { manifest: this.s.manifest, bundle: this.s.chunkBundleBatches[0] };
+        const blob = new Blob([JSON.stringify(comb, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "zd_combined.json";
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+      },
+
+      async importBundle() {
+        try {
+          if (!this.s.encryptedChunksMap) this.s.encryptedChunksMap = new Map();
+          let added = 0;
+          if (this.s.chunkBundleInput.trim()) {
+            const b = this.valJSON(this.s.chunkBundleInput, 'bundle');
+            b.chunks.forEach(c => this.s.encryptedChunksMap.set(c.chunkId, { cipher: c.cipher, salt: c.salt, iv: c.iv }));
+            added += b.chunks.length;
+            this.s.chunkBundleInput = '';
+          }
+          for (const file of this.s.chunkBundleFiles) {
+            const txt = await file.text();
+            const b = this.valJSON(txt, 'bundle');
+            b.chunks.forEach(c => this.s.encryptedChunksMap.set(c.chunkId, { cipher: c.cipher, salt: c.salt, iv: c.iv }));
+            added += b.chunks.length;
+          }
+          this.s.chunkBundleFiles = [];
+          if (added) showAlert(`Loaded ${added} encrypted chunks`);
+          else showAlert("No bundle data");
+          this.renderDec();
+          this.resetInact();
+        } catch (e) {
+          showAlert("Bundle error: " + e.message);
+        }
+      },
+
+      async importManifest() {
+        try {
+          let txt;
+          if (this.s.manifestFile) txt = await this.s.manifestFile.text();
+          else if (this.s.manifestInput.trim()) txt = this.s.manifestInput;
+          else return showAlert("Provide manifest");
+          const p = this.valJSON(txt, 'manifest');
+          this.s.manifestJson = txt;
+          this.s.parsedManifest = p;
+          this.s.isAsymmetric = p.keyType === 'ecdh';
+          this.s.manifestValid = true;
+          showAlert(`Manifest loaded: ${p.totalItems} items, ${p.totalChunks} chunks${p.keyType === 'ecdh' ? ' (Asymmetric)' : ''}`);
+          this.renderDec();
+          this.resetInact();
+        } catch (e) {
+          showAlert("Manifest error: " + e.message);
+          this.s.isAsymmetric = false;
+        }
+      },
+
+      async importCombined() {
+        try {
+          let txt;
+          if (this.s.combinedFile) txt = await this.s.combinedFile.text();
+          else if (this.s.combinedInput.trim()) txt = this.s.combinedInput;
+          else return showAlert("Provide combined file");
+          const c = JSON.parse(txt);
+          if (!c.manifest || !c.bundle) throw new Error("Invalid combined format");
+          this.valJSON(JSON.stringify(c.manifest), 'manifest');
+          this.valJSON(JSON.stringify(c.bundle), 'bundle');
+          this.s.manifestJson = JSON.stringify(c.manifest);
+          this.s.parsedManifest = c.manifest;
+          this.s.isAsymmetric = c.manifest.keyType === 'ecdh';
+          this.s.manifestValid = true;
+          this.s.encryptedChunksMap = new Map();
+          c.bundle.chunks.forEach(ch => this.s.encryptedChunksMap.set(ch.chunkId, { cipher: ch.cipher, salt: ch.salt, iv: ch.iv }));
+          showAlert(`Combined import successful: ${c.bundle.chunks.length} chunks, ${c.manifest.totalItems} items`);
+          this.renderDec();
+          this.resetInact();
+        } catch (e) {
+          showAlert("Combined error: " + e.message);
+          this.s.isAsymmetric = false;
+        }
+      },
+
+      // Encoding helpers
+      async prepareItems() {
+        const items = [];
+        if (this.s.textInput.trim().length > 0) {
+          const tb = new Blob([this.s.textInput], { type: 'text/plain' });
+          items.push({ did: this.rid(8), name: "note.txt", type: 'text/plain', blob: tb, cids: [] });
+        }
+        for (const file of this.s.files) {
+          items.push({ did: this.rid(8), name: file.name, type: file.type || 'application/octet-stream', blob: file, cids: [] });
+        }
+        return items;
+      },
+
+      async getEncryptionKey(isAsymmetric) {
+        if (isAsymmetric) {
+          if (this.s.plausibleDeniability) {
+            showAlert("Plausible Deniability disabled in Asymmetric Mode");
+            this.s.plausibleDeniability = false;
+          }
+          let pubs = [];
+          if (this.s.multiRecipient) {
+            pubs = this.s.receiverPubKeys.map(k => k.trim()).filter(k => k);
+          } else {
+            const single = this.s.receiverPubInput.trim();
+            if (single) pubs = [single];
+          }
+          if (pubs.length === 0) throw new Error("No public keys");
+          const sessionKey = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+          const sessionRaw = await crypto.subtle.exportKey('raw', sessionKey);
+          const recipients = [];
+          for (const pubB64 of pubs) {
+            const receiverPub = await this.importKey(pubB64, this.s.curve, true);
+            const senderKp = await this.genKeyPair(this.s.curve);
+            const shared = await this.deriveSharedKey(senderKp.privateKey, receiverPub);
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, shared, sessionRaw);
+            const senderPubB64 = await this.exportKey(senderKp.publicKey);
+            recipients.push({
+              senderPublic: senderPubB64,
+              encryptedSession: { cipher: this.ab2b64(cipher), iv: this.a2b64(iv) }
+            });
+            Scrub.wipe(senderKp.privateKey);
+          }
+          return { key: sessionKey, extras: { keyType: 'ecdh', curve: this.s.curve, recipients } };
+        } else {
+          return { key: this.s.passphrase, extras: { iterations: this.s.iterations, hashAlgorithm: this.s.hashAlgorithm } };
+        }
+      },
+
+      async encryptItemMetadata(item, key, isAsymmetric) {
+        const nb = new TextEncoder().encode(item.name);
+        const en = await this.encChunk(nb, key, isAsymmetric);
+        const tb2 = new TextEncoder().encode(item.type);
+        const et = await this.encChunk(tb2, key, isAsymmetric);
+        return {
+          encryptedName: { cipher: en.cipher, iv: en.iv, salt: en.salt },
+          encryptedType: { cipher: et.cipher, iv: et.iv, salt: et.salt }
+        };
+      },
+
+      async generateDecoys(manifest, keyForEncryption) {
+        const fakeUrls = [];
+        const decoyBaseMessage = "This is a plausible deniability decoy file.\n\nNo sensitive information is present.\nThis file was generated automatically as a decoy for security testing purposes.\n\nRepeated harmless message to fill the file:\n\nHello! This is just a test document. Today's grocery list: milk, bread, eggs, apples. The weather is nice. Nothing confidential here.\n\n";
+        const decoyEncoder = new TextEncoder();
+        const decoyPattern = decoyEncoder.encode(decoyBaseMessage);
+        for (let fk = 1; fk <= 2; fk++) {
+          const fakePass = this.rid(24);
+          let fakeManifest = JSON.parse(JSON.stringify(manifest));
+          fakeManifest.manifestId = this.rid(16);
+          const fakeChunkMap = new Map();
+          fakeManifest.encodedItems.forEach(it => {
+            it.dataItemId = this.rid(8);
+            it.chunkIds.forEach(c => {
+              const newId = this.rid(12);
+              fakeChunkMap.set(c.id, newId);
+              c.id = newId;
+            });
+          });
+          for (const item of fakeManifest.encodedItems) {
+            const realKeyName = await this.deriveKey(keyForEncryption, this.b642ab(item.encryptedName.salt), manifest.iterations, manifest.hashAlgorithm);
+            const nameDec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: this.b642ab(item.encryptedName.iv) }, realKeyName, this.b642ab(item.encryptedName.cipher));
+            const plainName = new TextDecoder().decode(new Uint8Array(nameDec));
+            Scrub.wipe(nameDec);
+            const fakeEncName = await this.encChunk(new TextEncoder().encode(plainName), fakePass, false);
+            item.encryptedName = { cipher: fakeEncName.cipher, salt: fakeEncName.salt, iv: fakeEncName.iv };
+            const realKeyType = await this.deriveKey(keyForEncryption, this.b642ab(item.encryptedType.salt), manifest.iterations, manifest.hashAlgorithm);
+            const typeDec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: this.b642ab(item.encryptedType.iv) }, realKeyType, this.b642ab(item.encryptedType.cipher));
+            const plainType = new TextDecoder().decode(new Uint8Array(typeDec));
+            Scrub.wipe(typeDec);
+            const fakeEncType = await this.encChunk(new TextEncoder().encode(plainType), fakePass, false);
+            item.encryptedType = { cipher: fakeEncType.cipher, salt: fakeEncType.salt, iv: fakeEncType.iv };
+          }
+          let fakeChunks = [];
+          for (const fitem of fakeManifest.encodedItems) {
+            for (let ci = 0; ci < fitem.chunkCount; ci++) {
+              const chunkMeta = fitem.chunkIds.find(cc => cc.chunkIndex === ci);
+              const chunkSize = (ci < fitem.chunkCount - 1) ? C.CHUNK_SIZE : (fitem.fileSize % C.CHUNK_SIZE) || C.CHUNK_SIZE;
+              const harmlessBuf = new Uint8Array(chunkSize);
+              for (let j = 0; j < chunkSize; j++) {
+                harmlessBuf[j] = decoyPattern[j % decoyPattern.length];
+              }
+              const encFake = await this.encChunk(harmlessBuf.buffer, fakePass, false);
+              fakeChunks.push({ chunkId: chunkMeta.id, cipher: encFake.cipher, salt: encFake.salt, iv: encFake.iv });
+            }
+          }
+          if (this.s.chunkBundleBatches.length > 1) {
+            const bs = Math.ceil(fakeChunks.length / this.s.chunkBundleBatches.length);
+            for (let bi = 0; bi < this.s.chunkBundleBatches.length; bi++) {
+              const st = bi * bs, ed = Math.min((bi + 1) * bs, fakeChunks.length);
+              const fakeBatch = { batchNum: bi, chunks: fakeChunks.slice(st, ed) };
+              const fbBlob = new Blob([JSON.stringify(fakeBatch, null, 2)], { type: 'application/json' });
+              const fbUrl = URL.createObjectURL(fbBlob);
+              const a2 = document.createElement('a');
+              a2.href = fbUrl; a2.download = `zd_fake_bundle_part${bi}_${fk}.json`; a2.click();
+              fakeUrls.push(fbUrl);
+            }
+          } else {
+            const fakeBatch = { chunks: fakeChunks };
+            const fbBlob = new Blob([JSON.stringify(fakeBatch, null, 2)], { type: 'application/json' });
+            const fbUrl = URL.createObjectURL(fbBlob);
+            const a2 = document.createElement('a');
+            a2.href = fbUrl; a2.download = `zd_fake_bundle_${fk}.json`; a2.click();
+            fakeUrls.push(fbUrl);
+          }
+          const fmBlob = new Blob([JSON.stringify(fakeManifest, null, 2)], { type: 'application/json' });
+          const fmUrl = URL.createObjectURL(fmBlob);
+          const a1 = document.createElement('a');
+          a1.href = fmUrl; a1.download = `zd_fake_manifest_${fk}.json`; a1.click();
+          fakeUrls.push(fmUrl);
+          if (this.s.combineOutput && this.s.chunkBundleBatches.length === 1) {
+            const fakeComb = { manifest: fakeManifest, bundle: { chunks: fakeChunks } };
+            const fcBlob = new Blob([JSON.stringify(fakeComb, null, 2)], { type: 'application/json' });
+            const fcUrl = URL.createObjectURL(fcBlob);
+            const a3 = document.createElement('a');
+            a3.href = fcUrl; a3.download = `zd_fake_combined_${fk}.json`; a3.click();
+            fakeUrls.push(fcUrl);
+          }
+          const fakePassBlob = new Blob([fakePass], { type: 'text/plain' });
+          const fpUrl = URL.createObjectURL(fakePassBlob);
+          const a4 = document.createElement('a');
+          a4.href = fpUrl; a4.download = `zd_fake_passphrase_${fk}.txt`; a4.click();
+          fakeUrls.push(fpUrl);
+        }
+        setTimeout(() => fakeUrls.forEach(u => URL.revokeObjectURL(u)), 10000);
+      },
+
+      async handleEncode() {
+        try {
+          const hasText = this.s.textInput.trim().length > 0;
+          const total = this.s.files.length + (hasText ? 1 : 0);
+          if (!total) return showAlert("Add text or files");
+          if (this.s.asymmetricMode) {
+            let pubs = [];
+            if (this.s.multiRecipient) {
+              pubs = this.s.receiverPubKeys.map(k => k.trim()).filter(k => k);
+            } else {
+              const single = this.s.receiverPubInput.trim();
+              if (single) pubs = [single];
+            }
+            if (pubs.length === 0) return showAlert("Paste at least one receiver's public key");
+          } else {
+            if (this.s.passphrase.length < 8) return showAlert("Passphrase minimum 8 characters");
+            const strength = this.checkStrength(this.s.passphrase);
+            if (strength === 'weak') {
+              showConfirm("Weak passphrase detected. Continue anyway?", async () => await this.performEncode());
+              return;
+            }
+            if (strength === 'medium') {
+              showConfirm("Medium strength passphrase. Continue?", async () => await this.performEncode());
+              return;
+            }
+          }
+          await this.performEncode();
+        } catch (e) {
+          showAlert("Encryption failed: " + e.message);
+          this.s.isEncoding = false;
+          this.s.currentStatus = '';
+          this.renderEnc();
+        }
+      },
+
+      async performEncode() {
+        try {
+          this.s.isEncoding = true;
+          this.s.progress = 0;
+          this.s.manifest = null;
+          this.s.parsedManifest = null;
+          this.s.chunkBundleBatches = null;
+          this.s.currentStatus = 'Preparing...';
+          this.renderEnc();
+
+          const isAsymmetric = this.s.asymmetricMode;
+          const items = await this.prepareItems();
+          const { key: keyForEncryption, extras: manifestExtras } = await this.getEncryptionKey(isAsymmetric);
+
+          const bundle = { chunks: [] };
+          let totalChunks = 0;
+          let proc = 0;
+          let encoded = [];
+
+          for (const item of items) {
+            let blobToUse = item.blob;
+            let itemSize = blobToUse.size;
+            if (this.s.compress) {
+              this.s.currentStatus = `Compressing: ${this.esc(item.name)}`;
+              this.renderEnc();
+              blobToUse = await this.compressBlob(blobToUse);
+              itemSize = blobToUse.size;
+            }
+            const nc = Math.ceil(itemSize / C.CHUNK_SIZE);
+            totalChunks += nc;
+            if (!nc) continue;
+            this.s.currentStatus = `Processing: ${this.esc(item.name)}`;
+            this.renderEnc();
+            const reader = blobToUse.stream().getReader();
+            let buffer = new Uint8Array(0);
+            let i = 0;
+            while (true) {
+              if (!this.s.isEncoding) throw new Error("Cancelled");
+              const { done, value } = await reader.read();
+              if (done) break;
+              const newBuffer = new Uint8Array(buffer.length + value.length);
+              newBuffer.set(buffer);
+              newBuffer.set(value, buffer.length);
+              buffer = newBuffer;
+              while (buffer.length >= C.CHUNK_SIZE) {
+                const chunk = buffer.subarray(0, C.CHUNK_SIZE);
+                const cid = this.rid(12);
+                const enc = await this.encChunk(chunk, keyForEncryption, isAsymmetric);
+                const chunkEntry = { chunkId: cid, cipher: enc.cipher, iv: enc.iv };
+                if (enc.salt) chunkEntry.salt = enc.salt;
+                bundle.chunks.push(chunkEntry);
+                item.cids.push({ id: cid, chunkIndex: i, globalIndex: proc++ });
+                i++;
+                this.s.currentStatus = `Encrypting: ${this.esc(item.name)} (${proc}/${totalChunks})`;
+                if (proc % C.YIELD_INTERVAL === 0) {
+                  this.s.progress = (proc / totalChunks) * 100;
+                  this.renderEnc();
+                  await new Promise(r => requestAnimationFrame(r));
+                }
+                buffer = buffer.subarray(C.CHUNK_SIZE);
+              }
+            }
+            if (buffer.length > 0) {
+              const chunk = buffer.slice();
+              const cid = this.rid(12);
+              const enc = await this.encChunk(chunk, keyForEncryption, isAsymmetric);
+              const chunkEntry = { chunkId: cid, cipher: enc.cipher, iv: enc.iv };
+              if (enc.salt) chunkEntry.salt = enc.salt;
+              bundle.chunks.push(chunkEntry);
+              item.cids.push({ id: cid, chunkIndex: i, globalIndex: proc++ });
+              this.s.currentStatus = `Encrypting: ${this.esc(item.name)} (${proc}/${totalChunks})`;
+              if (proc % C.YIELD_INTERVAL === 0) {
+                this.s.progress = (proc / totalChunks) * 100;
+                this.renderEnc();
+                await new Promise(r => requestAnimationFrame(r));
+              }
+            }
+            const { encryptedName, encryptedType } = await this.encryptItemMetadata(item, keyForEncryption, isAsymmetric);
+            encoded.push({
+              dataItemId: item.did,
+              encryptedName,
+              encryptedType,
+              fileSize: item.blob.size,
+              chunkIds: item.cids,
+              chunkCount: nc
+            });
+          }
+
+          this.s.currentStatus = 'Finalizing...';
+          this.renderEnc();
+
+          const mid = this.rid(16);
+          const manifest = {
+            manifestId: mid,
+            timestamp: Date.now(),
+            totalItems: items.length,
+            totalChunks,
+            totalSize: items.reduce((s, it) => s + it.blob.size, 0),
+            encodedItems: encoded,
+            batchCount: 1,
+            compressed: this.s.compress,
+            ...manifestExtras
+          };
+
+          const est = this.estSize(totalChunks);
+          let numB = 1;
+          if (est > C.EST_MAX_JSON_SIZE || totalChunks > C.BATCH_THRESHOLD) {
+            numB = Math.max(2, Math.ceil(est / C.EST_MAX_JSON_SIZE));
+            const bs = Math.ceil(totalChunks / numB);
+            const batches = [];
+            for (let b = 0; b < numB; b++) {
+              const st = b * bs, ed = Math.min((b + 1) * bs, totalChunks);
+              batches.push({ batchNum: b, chunks: bundle.chunks.slice(st, ed) });
+              for (const item of manifest.encodedItems) {
+                for (const chunk of item.chunkIds) {
+                  if (chunk.globalIndex >= st && chunk.globalIndex < ed) chunk.batchNum = b;
+                }
+              }
+            }
+            manifest.batchCount = numB;
+            this.s.chunkBundleBatches = batches;
+            showAlert(`Large payload - split into ${numB} bundle parts`);
+          } else {
+            this.s.chunkBundleBatches = [{ batchNum: 0, chunks: bundle.chunks }];
+          }
+
+          this.s.manifest = manifest;
+          this.s.parsedManifest = manifest;
+          this.s.progress = 100;
+          this.s.currentStatus = 'Done!';
+          if (this.s.autoDownloadBundle) this.dlBundle();
+          if (this.s.autoDownloadManifest) this.dlManifest();
+          if (this.s.combineOutput && numB === 1) this.dlCombined();
+
+          if (this.s.plausibleDeniability && !isAsymmetric) {
+            await this.generateDecoys(manifest, keyForEncryption);
+          }
+
+          if (isAsymmetric) {
+            this.s.receiverPubKeys = [''];
+            this.s.receiverPubInput = '';
+            this.s.multiRecipient = false;
+          } else {
+            this.s.passphrase = '';
+          }
+
+          showAlert(`Encrypted ${encoded.length} items into ${totalChunks} chunks!`);
+        } catch (e) {
+          throw e;
+        } finally {
+          this.s.isEncoding = false;
+          this.s.currentStatus = '';
+          this.renderEnc();
+        }
+      },
+
+      async handleDecode() {
+        try {
+          if (this.s.isDecoding) return;
+          this.cleanBlobs();
+          this.s.decodedFiles = [];
+          this.s.viewedTexts = {};
+          this.s.decProgress = 0;
+          this.s.currentStatus = 'Preparing...';
+          this.renderDec();
+          if (!this.s.parsedManifest) return showAlert("Import manifest first");
+          if (!this.s.encryptedChunksMap) return showAlert("Import bundle first");
+          const man = this.s.parsedManifest;
+          const isAsym = this.s.isAsymmetric;
+          let credential;
+          if (isAsym) {
+            if (!this.s.privateKeyInput.trim()) return showAlert("Enter your private key");
+            try {
+              const privateKey = await this.importKey(this.s.privateKeyInput, man.curve, false);
+              let sessionKey = null;
+              for (const recipient of man.recipients || []) {
+                try {
+                  const senderPub = await this.importKey(recipient.senderPublic, man.curve, true);
+                  const shared = await this.deriveSharedKey(privateKey, senderPub);
+                  const iv = this.b642ab(recipient.encryptedSession.iv);
+                  const cipher = this.b642ab(recipient.encryptedSession.cipher);
+                  const sessionRaw = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, shared, cipher);
+                  sessionKey = await crypto.subtle.importKey('raw', sessionRaw, 'AES-GCM', false, ['decrypt']);
+                  break;
+                } catch {
+                  continue;
+                }
+              }
+              if (!sessionKey) throw new Error("No matching recipient key");
+              credential = sessionKey;
+              this.s.privateKeyInput = '';
+            } catch (keyErr) {
+              showAlert("Invalid private key format or no matching recipient. Ensure the key is valid for P-384.");
+              this.s.isDecoding = false;
+              this.renderDec();
+              return;
+            }
+          } else {
+            let decCredential = this.s.decPassphrase;
+            if (decCredential.length < 8) return showAlert("Credential minimum 8 characters");
+            credential = decCredential;
+          }
+          const requiredChunks = man.encodedItems.flatMap(item => item.chunkIds.map(c => c.id));
+          for (const cid of requiredChunks) {
+            if (!this.s.encryptedChunksMap.has(cid)) throw new Error(`Missing chunk ${cid}`);
+          }
+          this.s.isDecoding = true;
+          const tc = man.totalChunks;
+          let proc = 0, files = [];
+          for (const item of man.encodedItems) {
+            const nc = item.chunkCount || 0;
+            if (!nc) continue;
+            const chunks = [];
+            for (let i = 0; i < nc; i++) {
+              if (!this.s.isDecoding) throw new Error("Cancelled");
+              const cm = item.chunkIds.find(c => c.chunkIndex === i);
+              if (!cm) throw new Error("Missing chunk metadata");
+              const ec = this.s.encryptedChunksMap.get(cm.id);
+              if (!ec) throw new Error("Chunk data missing");
+              let key;
+              if (isAsym) {
+                key = credential;
+              } else {
+                if (!ec.salt) throw new Error("Missing salt (wrong mode or corrupted)");
+                key = await this.deriveKey(credential, this.b642ab(ec.salt), man.iterations, man.hashAlgorithm);
+              }
+              const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv: this.b642ab(ec.iv) }, key, this.b642ab(ec.cipher));
+              chunks.push(new Uint8Array(decrypted).slice());
+              Scrub.wipe(decrypted);
+              proc++;
+              this.s.currentStatus = `Decrypting (${proc}/${tc})`;
+              if (proc % C.YIELD_INTERVAL === 0) {
+                this.s.decProgress = (proc / tc) * 100;
+                this.renderDec();
+                await new Promise(r => requestAnimationFrame(r));
+              }
+            }
+            let buf = new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.length, 0));
+            let offset = 0;
+            for (const chunk of chunks) {
+              buf.set(chunk, offset);
+              offset += chunk.length;
+            }
+            if (man.compressed) {
+              if (!window.DecompressionStream) {
+                showAlert("This data is compressed but your browser doesn't support decompression. Use a modern browser like Chrome.");
+                this.s.isDecoding = false;
+                this.renderDec();
+                return;
+              }
+              this.s.currentStatus = `Decompressing item`;
+              this.renderDec();
+              try {
+                buf = await this.decompressBuf(buf.buffer);
+              } catch (decompErr) {
+                showAlert("Decompression failed (invalid compressed data). Check passphrase/private key and file integrity.");
+                this.s.isDecoding = false;
+                this.renderDec();
+                return;
+              }
+            }
+            if (buf.length !== item.fileSize) {
+              showAlert("Decrypted size mismatch - possible data corruption or incorrect key.");
+              this.s.isDecoding = false;
+              this.renderDec();
+              return;
+            }
+            let nameDec;
+            const nameObj = item.encryptedName;
+            try {
+              let key;
+              if (isAsym) {
+                key = credential;
+              } else {
+                if (!nameObj.salt) throw new Error("Missing salt in filename");
+                key = await this.deriveKey(credential, this.b642ab(nameObj.salt), man.iterations, man.hashAlgorithm);
+              }
+              nameDec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: this.b642ab(nameObj.iv) }, key, this.b642ab(nameObj.cipher));
+            } catch (nameErr) {
+              showAlert("Failed to decrypt filename. Wrong credential or corrupted data.");
+              this.s.isDecoding = false;
+              this.renderDec();
+              return;
+            }
+            const name = new TextDecoder().decode(new Uint8Array(nameDec));
+            Scrub.wipe(nameDec);
+            let typeDec;
+            const typeObj = item.encryptedType;
+            try {
+              let key;
+              if (isAsym) {
+                key = credential;
+              } else {
+                if (!typeObj.salt) throw new Error("Missing salt in filetype");
+                key = await this.deriveKey(credential, this.b642ab(typeObj.salt), man.iterations, man.hashAlgorithm);
+              }
+              typeDec = await crypto.subtle.decrypt({ name: "AES-GCM", iv: this.b642ab(typeObj.iv) }, key, this.b642ab(typeObj.cipher));
+            } catch (typeErr) {
+              showAlert("Failed to decrypt file type. Wrong credential or corrupted data.");
+              this.s.isDecoding = false;
+              this.renderDec();
+              return;
+            }
+            const type = new TextDecoder().decode(new Uint8Array(typeDec));
+            Scrub.wipe(typeDec);
+            const blob = new Blob([buf], { type });
+            const url = URL.createObjectURL(blob);
+            this.s.blobUrls.push(url);
+            files.push({ name, blob, size: blob.size, type, blobUrl: url });
+          }
+          this.s.decodedFiles = files;
+          this.s.decProgress = 100;
+          this.s.currentStatus = 'Done!';
+          showAlert(`Decrypted ${files.length} files! Download now — auto-purge in 5 minutes`);
+          this.startPurge();
+          this.startInact();
+        } catch (e) {
+          let msg = "Decryption failed";
+          if (e && e.message) msg += ": " + e.message;
+          showAlert(msg);
+          this.cleanBlobs();
+        } finally {
+          this.s.isDecoding = false;
+          this.s.currentStatus = '';
+          this.renderDec();
+          this.s.privateKeyInput = '';
+        }
+      },
+
+      dlDecoded(i) {
+        const f = this.s.decodedFiles[i];
+        if (!f) return;
+        const url = f.blobUrl || URL.createObjectURL(f.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = f.name;
+        a.click();
+        if (!f.blobUrl) setTimeout(() => URL.revokeObjectURL(url), 10000);
+        this.resetInact();
+      },
+
+      async toggleViewDec(i) {
+        const f = this.s.decodedFiles[i];
+        if (!this.s.viewedTexts[i]) this.s.viewedTexts[i] = { showing: false, text: null };
+        const v = this.s.viewedTexts[i];
+        v.showing = !v.showing;
+        if (v.showing && v.text === null) v.text = await f.blob.text();
+        this.renderDec();
+        this.resetInact();
+      },
+
+      startPurge() {
+        if (this.s.purgeTimer) clearInterval(this.s.purgeTimer);
+        this.s.remainingTime = C.PURGE_DELAY;
+        this.s.sessionStartTime = performance.now();
+        this.updateCountdown();
+        this.s.purgeTimer = setInterval(() => {
+          const elapsed = (performance.now() - this.s.sessionStartTime) / 1000;
+          this.s.remainingTime = Math.max(0, C.PURGE_DELAY - Math.floor(elapsed));
+          this.updateCountdown();
+          if (this.s.remainingTime <= 0) {
+            clearInterval(this.s.purgeTimer);
+            this.s.purgeTimer = null;
+            this.doCleanup();
+          }
+        }, 1000);
+      },
+
+      updateCountdown() {
+        const el = document.getElementById('countdown');
+        if (el) {
+          el.textContent = this.s.remainingTime;
+          el.className = this.s.remainingTime <= 10 ? 'timer-red' : '';
+        }
+      },
+
+      startInact() {
+        this.resetInact();
+        const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart', 'blur'];
+        events.forEach(e => {
+          if (e === 'blur') {
+            window.addEventListener(e, Scrub.keepPressure);
+          } else {
+            document.addEventListener(e, this.boundReset, { passive: true });
+          }
+        });
+      },
+
+      resetInact() {
+        if (this.s.inactivityTimer) clearTimeout(this.s.inactivityTimer);
+        this.s.inactivityTimer = setTimeout(() => this.doCleanup(), C.INACTIVITY_TIMEOUT * 1000);
+      },
+
+      boundReset: null,
+
+      handleCleanup() {
+        this.doCleanup();
+      },
+
+      doCleanup() {
+        if (this.s.isEncoding || this.s.isDecoding) return;
+        clearInterval(this.s.purgeTimer); this.s.purgeTimer = null;
+        Scrub.nukeEverything();
+      },
+
+      handleManChange(e) { this.s.manifestInput = e.target.value; this.s.manifestValid = false; this.resetInact(); },
+      handleBunChange(e) { this.s.chunkBundleInput = e.target.value; this.resetInact(); },
+      handleCombChange(e) { this.s.combinedInput = e.target.value; this.resetInact(); },
+      handleManFileChange(e) { this.s.manifestFile = e.target.files[0]; this.s.manifestValid = false; this.renderDec(); this.resetInact(); },
+      handleBunFileChange(e) { if (e.target.files) this.s.chunkBundleFiles = this.s.chunkBundleFiles.concat(Array.from(e.target.files)); this.renderDec(); this.resetInact(); },
+      handleCombFileChange(e) { this.s.combinedFile = e.target.files[0]; this.renderDec(); this.resetInact(); },
+      removeManFile() { this.s.manifestFile = null; const inp = document.querySelector('input[type="file"][onchange*="handleManFileChange"]'); if (inp) inp.value = ''; this.renderDec(); this.resetInact(); },
+      removeBunFile(i) { this.s.chunkBundleFiles.splice(i, 1); this.renderDec(); this.resetInact(); },
+      removeCombFile() { this.s.combinedFile = null; const inp = document.querySelector('input[type="file"][onchange*="handleCombFileChange"]'); if (inp) inp.value = ''; this.renderDec(); this.resetInact(); },
+      cancelOp() { this.s.isEncoding = false; this.s.isDecoding = false; this.s.progress = 0; this.s.decProgress = 0; this.s.currentStatus = ''; showAlert("Cancelled"); this.renderEnc(); this.renderDec(); this.resetInact(); },
+
+      renderEnc() {
+        const el = document.getElementById('encoder');
+        if (!el) return;
+        const isAsym = this.s.asymmetricMode;
+        let h = '<h2 id="encoder-heading" class="text-lg font-bold mb-4">Encrypt</h2><div class="space-y-4">';
+        h += `<label for="text-input" class="sr-only">Text to encrypt</label>`;
+        h += `<textarea id="text-input" class="input-text-area" placeholder="Enter optional text" oninput="Z.handleTextChange(event)" rows="4" aria-describedby="charCount">${this.esc(this.s.textInput)}</textarea>`;
+        h += `<p id="charCount" class="text-sm">Chars: ${this.s.textInput.length.toLocaleString()} / ${C.MAX_TEXT_LENGTH.toLocaleString()}</p>`;
+        h += '<button type="button" class="button-primary" onclick="Z.clearText()" aria-label="Clear all text input">Clear Text</button>';
+        h += '<label class="button-primary w-full" style="display:block;text-align:center" for="file-upload">Choose Files<input id="file-upload" type="file" multiple onchange="Z.handleFileChange(event)" style="display:none" aria-label="Upload files for encryption"></label>';
+        for (let i = 0; i < this.s.files.length; i++) {
+          h += `<div class="list-item"><span class="list-item-content">${this.esc(this.s.files[i].name)} (${this.fmtB(this.s.files[i].size)})</span><button type="button" class="button-primary" onclick="Z.removeFile(${i})" aria-label="Remove ${this.esc(this.s.files[i].name)}">Remove</button></div>`;
+        }
+        const totalSize = new TextEncoder().encode(this.s.textInput).length + this.s.files.reduce((a, f) => a + f.size, 0);
+        h += `<p id="totalSize" class="text-sm">Total: ${this.fmtB(totalSize)} / ${this.fmtB(C.MAX_TOTAL_SIZE)}</p>`;
+        h += '<div class="passphrase-container sym-passphrase" style="' + (isAsym ? 'display:none' : '') + '">';
+        const pt = this.s.showPassphrase ? 'text' : 'password';
+        h += `<label for="passphrase-input" class="sr-only">Passphrase (min 8)</label>`;
+        h += `<input id="passphrase-input" type="${pt}" class="input-text-area" placeholder="Passphrase (min 8)" value="${this.esc(this.s.passphrase)}" oninput="Z.handlePassChange(event)" autocorrect="off" autocapitalize="off" spellcheck="false">`;
+        h += `<button type="button" class="button-primary" onclick="Z.toggleShowPass()" aria-label="Toggle passphrase visibility">${this.s.showPassphrase ? 'Hide' : 'Show'}</button>`;
+        h += `<button type="button" class="button-primary" onclick="Z.genPass()" aria-label="Generate random passphrase">Generate</button></div>`;
+        if (isAsym) {
+          h += `<div class="checkbox-option"><input type="checkbox" id="multiRecip" ${this.s.multiRecipient ? 'checked' : ''} onchange="Z.toggleMultiRecipient(event)"><label for="multiRecip">Multiple Recipients</label></div>`;
+          if (this.s.multiRecipient) {
+            h += '<div class="multi-pub-container">';
+            this.s.receiverPubKeys.forEach((key, i) => {
+              h += `<div class="multi-pub-item"><label for="pubkey-${i}" class="sr-only">Receiver Public Key ${i + 1}</label><textarea id="pubkey-${i}" class="input-text-area" rows="6" placeholder="Receiver Public Key ${i + 1}" oninput="Z.handleReceiverPubKeyChange(${i},event)">${this.esc(key)}</textarea>`;
+              if (i > 0) h += `<button type="button" class="button-primary" onclick="Z.removeRecipient(${i})" aria-label="Remove recipient ${i + 1}">−</button>`;
+              h += `</div>`;
+            });
+            h += `<button type="button" class="button-primary w-full" onclick="Z.addRecipient()" aria-label="Add another recipient">+ Add Recipient</button></div>`;
+          } else {
+            h += `<label for="single-pubkey" class="sr-only">Receiver Public Key (Base64 SPKI)</label>`;
+            h += `<textarea id="single-pubkey" class="input-text-area" rows="8" placeholder="Receiver Public Key (Base64 SPKI)" oninput="Z.handleReceiverPubChange(event)">${this.esc(this.s.receiverPubInput)}</textarea>`;
+          }
+        }
+        h += `<div class="checkbox-option"><input type="checkbox" id="asymMode" ${isAsym ? 'checked' : ''} onchange="Z.toggleAsymMode(event)"><label for="asymMode">Asymmetric Mode (Forward Secret - Recommended)</label></div>`;
+        h += `<div style="${isAsym ? 'display:none' : ''}">`;
+        h += `<label for="hash-select" class="sr-only">Hash Algorithm</label><select id="hash-select" class="input-text-area" onchange="Z.handleHashChange(event)">` +
+          `<option value="SHA-256"${this.s.hashAlgorithm === 'SHA-256' ? ' selected' : ''}>SHA-256</option>` +
+          `<option value="SHA-512"${this.s.hashAlgorithm === 'SHA-512' ? ' selected' : ''}>SHA-512</option></select>`;
+        h += `<label for="iterations-input" class="sr-only">PBKDF2 Iterations</label><input id="iterations-input" type="number" class="input-text-area" value="${this.s.iterations}" oninput="Z.handleIterChange(event)" placeholder="PBKDF2 Iterations">`;
+        h += `</div>`;
+        h += `<div class="checkbox-option"><input type="checkbox" id="compress" ${this.s.compress ? 'checked' : ''} onchange="Z.handleCompressChange(event)"><label for="compress">Compress Before Encryption (gzip)</label></div>`;
+        h += `<div class="checkbox-option"><input type="checkbox" id="ab" ${this.s.autoDownloadBundle ? 'checked' : ''} onchange="Z.handleAutoBunChange(event)"><label for="ab">Auto Download Bundle</label></div>`;
+        h += `<div class="checkbox-option"><input type="checkbox" id="am" ${this.s.autoDownloadManifest ? 'checked' : ''} onchange="Z.handleAutoManChange(event)"><label for="am">Auto Download Manifest</label></div>`;
+        h += `<div class="checkbox-option"><input type="checkbox" id="co" ${this.s.combineOutput ? 'checked' : ''} onchange="Z.handleCombOutChange(event)"><label for="co">Auto Download Combined (single file)</label></div>`;
+        h += `<div class="checkbox-option"><input type="checkbox" id="pdm" ${this.s.plausibleDeniability ? 'checked' : ''} ${isAsym ? 'disabled' : ''} onchange="Z.handlePDMChange(event)"><label for="pdm">Plausible Deniability${isAsym ? ' (disabled in asymmetric)' : ''}</label></div>`;
+        h += `<button type="button" class="button-primary w-full" onclick="Z.handleEncode()" ${this.s.isEncoding ? 'disabled aria-disabled="true"' : ''} aria-label="Start encryption process">Start Encryption</button>`;
+        if (this.s.isEncoding) {
+          h += `<div class="flex items-center"><div class="loading-spinner"></div><span>${this.s.currentStatus}</span></div>`;
+          h += `<div style="background:var(--border-color);height:8px;border-radius:4px"><div class="progress-bar" style="width:${this.s.progress}%"></div></div>`;
+          h += `<p class="warning-banner">Avoid switching tabs during this operation to maintain optimal security. Doing so will trigger an immediate secure data purge.</p>`;
+          h += `<button type="button" class="button-primary" onclick="Z.cancelOp()" aria-label="Cancel encryption">Cancel</button>`;
+        }
+        if (this.s.manifest && this.s.chunkBundleBatches) {
+          h += '<h3 class="font-bold mt-4">Manifest</h3>';
+          if (this.s.showManifestView) h += `<pre>${this.esc(JSON.stringify(this.s.manifest, null, 2))}</pre>`;
+          h += `<div class="flex flex-wrap gap-2"><button type="button" class="button-primary" onclick="Z.toggleManView()" aria-label="Toggle manifest view">${this.s.showManifestView ? 'Hide' : 'View'}</button><button type="button" class="button-primary" onclick="Z.copyManifest()" aria-label="Copy manifest to clipboard">Copy</button><button type="button" class="button-primary" onclick="Z.dlManifest()" aria-label="Download manifest">Download</button></div>`;
+          h += `<h3 class="font-bold mt-4">Bundle${this.s.chunkBundleBatches.length > 1 ? ' (' + this.s.chunkBundleBatches.length + ' parts)' : ''}</h3>`;
+          if (this.s.showBundleView) this.s.chunkBundleBatches.forEach(b => h += `<pre>${this.esc(JSON.stringify(b, null, 2))}</pre>`);
+          h += `<div class="flex flex-wrap gap-2"><button type="button" class="button-primary" onclick="Z.toggleBunView()" aria-label="Toggle bundle view">${this.s.showBundleView ? 'Hide' : 'View'}</button><button type="button" class="button-primary" onclick="Z.copyBundle()" aria-label="Copy bundle to clipboard">Copy</button><button type="button" class="button-primary" onclick="Z.dlBundle()" aria-label="Download bundle">Download</button></div>`;
+          if (this.s.chunkBundleBatches.length === 1) {
+            h += '<h3 class="font-bold mt-4">Combined</h3>';
+            if (this.s.showCombinedView) {
+              const comb = { manifest: this.s.manifest, bundle: this.s.chunkBundleBatches[0] };
+              h += `<pre>${this.esc(JSON.stringify(comb, null, 2))}</pre>`;
+            }
+            h += `<div class="flex flex-wrap gap-2"><button type="button" class="button-primary" onclick="Z.toggleCombView()" aria-label="Toggle combined view">${this.s.showCombinedView ? 'Hide' : 'View'}</button><button type="button" class="button-primary" onclick="Z.copyCombined()" aria-label="Copy combined to clipboard">Copy</button><button type="button" class="button-primary" onclick="Z.dlCombined()" aria-label="Download combined">Download</button></div>`;
+          }
+        }
+        h += '</div>';
+        el.innerHTML = h;
+      },
+
+      renderDec() {
+        const el = document.getElementById('decoder');
+        if (!el) return;
+        const isAsym = this.s.isAsymmetric;
+        let h = '<h2 id="decoder-heading" class="text-lg font-bold mb-4">Decrypt</h2><div class="space-y-4">';
+        h += '<h3 class="font-bold">Combined (optional)</h3>';
+        h += '<label class="button-primary w-full" style="display:block;text-align:center" for="combined-upload">Upload Combined<input id="combined-upload" type="file" onchange="Z.handleCombFileChange(event)" style="display:none" aria-label="Upload combined file"></label>';
+        if (this.s.combinedFile) h += `<div class="list-item"><span class="list-item-content">${this.esc(this.s.combinedFile.name)}</span><button type="button" class="button-primary" onclick="Z.removeCombFile()" aria-label="Remove combined file">Remove</button></div>`;
+        h += `<label for="combined-input" class="sr-only">Or paste combined JSON</label><textarea id="combined-input" class="input-text-area" placeholder="Or paste combined JSON" oninput="Z.handleCombChange(event)" rows="3">${this.esc(this.s.combinedInput)}</textarea>`;
+        h += '<button type="button" class="button-primary" onclick="Z.importCombined()" aria-label="Import combined file">Import Combined</button>';
+        h += '<h3 class="font-bold">Bundle</h3>';
+        h += '<label class="button-primary w-full" style="display:block;text-align:center" for="bundle-upload">Upload Bundle Part(s)<input id="bundle-upload" type="file" multiple onchange="Z.handleBunFileChange(event)" style="display:none" aria-label="Upload bundle files"></label>';
+        for (let i = 0; i < this.s.chunkBundleFiles.length; i++) h += `<div class="list-item"><span class="list-item-content">${this.esc(this.s.chunkBundleFiles[i].name)}</span><button type="button" class="button-primary" onclick="Z.removeBunFile(${i})" aria-label="Remove bundle file ${i + 1}">Remove</button></div>`;
+        h += `<label for="bundle-input" class="sr-only">Or paste bundle JSON</label><textarea id="bundle-input" class="input-text-area" placeholder="Or paste bundle JSON" oninput="Z.handleBunChange(event)" rows="3">${this.esc(this.s.chunkBundleInput)}</textarea>`;
+        h += '<button type="button" class="button-primary" onclick="Z.importBundle()" aria-label="Import bundle">Import Bundle</button>';
+        if (this.s.encryptedChunksMap) h += `<p class="text-success">Chunks loaded: ${this.s.encryptedChunksMap.size}</p>`;
+        h += '<h3 class="font-bold">Manifest</h3>';
+        h += '<label class="button-primary w-full" style="display:block;text-align:center" for="manifest-upload">Upload Manifest<input id="manifest-upload" type="file" onchange="Z.handleManFileChange(event)" style="display:none" aria-label="Upload manifest file"></label>';
+        if (this.s.manifestFile) h += `<div class="list-item"><span class="list-item-content">${this.esc(this.s.manifestFile.name)}</span><button type="button" class="button-primary" onclick="Z.removeManFile()" aria-label="Remove manifest file">Remove</button></div>`;
+        h += `<label for="manifest-input" class="sr-only">Or paste manifest JSON</label><textarea id="manifest-input" class="input-text-area" placeholder="Or paste manifest JSON" oninput="Z.handleManChange(event)" rows="3">${this.esc(this.s.manifestInput)}</textarea>`;
+        h += '<button type="button" class="button-primary" onclick="Z.importManifest()" aria-label="Import manifest">Import Manifest</button>';
+        if (this.s.manifestValid) h += '<p class="text-success">Manifest loaded</p>';
+        if (this.s.parsedManifest) {
+          if (isAsym) {
+            h += '<p class="text-success font-bold">Asymmetric mode detected (ECDH P-384 Forward Secret)</p>';
+            if (this.s.parsedManifest.recipients) {
+              h += `<div class="space-y-2"><h4 class="font-bold">Sender Public Key(s)</h4>`;
+              this.s.parsedManifest.recipients.forEach(r => {
+                h += `<textarea class="input-text-area" rows="8" readonly>${this.esc(r.senderPublic)}</textarea>`;
+              });
+              h += `<p class="text-sm mt-2">These are temporary public keys generated by the sender for this specific message only. They ensure forward secrecy. You do <strong>not</strong> need to copy or use these keys—the app handles them automatically during decryption.</p></div>`;
+            }
+          } else {
+            h += '<p class="text-success font-bold">Symmetric mode (passphrase)</p>';
+          }
+        }
+        h += `<div class="sym-passphrase" style="${isAsym ? 'display:none' : ''}">`;
+        const dpt = this.s.showDecPassphrase ? 'text' : 'password';
+        h += `<div class="passphrase-container"><label for="dec-passphrase-input" class="sr-only">Passphrase</label><input id="dec-passphrase-input" type="${dpt}" class="input-text-area" placeholder="Passphrase" value="${this.esc(this.s.decPassphrase)}" oninput="Z.handleDecPassChange(event)" autocorrect="off" autocapitalize="off" spellcheck="false">`;
+        h += `<button type="button" class="button-primary" onclick="Z.toggleShowDecPass()" aria-label="Toggle decryption passphrase visibility">${this.s.showDecPassphrase ? 'Hide' : 'Show'}</button></div>`;
+        h += `</div>`;
+        if (isAsym) {
+          h += `<div class="passphrase-container"><h3 class="font-bold w-full">Your Private Key</h3>`;
+          h += `<label for="private-key-input" class="sr-only">Private Key (PKCS8 Base64)</label><textarea id="private-key-input" class="input-text-area private-key-input" rows="8" placeholder="Private Key (PKCS8 Base64)" oninput="Z.handlePrivateKeyChange(event)">${this.esc(this.s.privateKeyInput)}</textarea>`;
+          h += `<button type="button" class="button-primary" onclick="Z.toggleShowPrivate()" aria-label="Toggle private key visibility">${this.s.showPrivateKey ? 'Hide' : 'Show'}</button></div>`;
+        }
+        h += `<button type="button" class="button-primary w-full" onclick="Z.handleDecode()" ${this.s.isDecoding ? 'disabled aria-disabled="true"' : ''} aria-label="Start decryption process">Start Decryption</button>`;
+        if (this.s.isDecoding) {
+          h += `<div class="flex items-center"><div class="loading-spinner"></div><span>${this.s.currentStatus}</span></div>`;
+          h += `<div style="background:var(--border-color);height:8px;border-radius:4px"><div class="progress-bar" style="width:${this.s.decProgress}%"></div></div>`;
+          h += `<p class="warning-banner">Avoid switching tabs during this operation to maintain optimal security. Doing so will trigger an immediate secure data purge.</p>`;
+          h += `<button type="button" class="button-primary" onclick="Z.cancelOp()" aria-label="Cancel decryption">Cancel</button>`;
+        }
+        if (this.s.decodedFiles.length) {
+          h += '<h3 class="font-bold mt-4">Decrypted Files</h3>';
+          for (let i = 0; i < this.s.decodedFiles.length; i++) {
+            const f = this.s.decodedFiles[i];
+            h += `<div class="list-item"><span class="list-item-content">${this.esc(f.name)} (${this.fmtB(f.size)})</span><div class="list-item-actions">`;
+            h += `<button type="button" class="button-primary" onclick="Z.dlDecoded(${i})" aria-label="Download ${this.esc(f.name)}">Download</button>`;
+            if (f.type && (f.type.startsWith('text/') || f.name.endsWith('.txt'))) h += `<button type="button" class="button-primary" onclick="Z.toggleViewDec(${i})" aria-label="Toggle view of ${this.esc(f.name)}">${this.s.viewedTexts[i]?.showing ? 'Hide' : 'View'}</button>`;
+            h += `</div></div>`;
+            if (this.s.viewedTexts[i]?.showing) h += `<pre>${this.esc(this.s.viewedTexts[i].text || 'Loading...')}</pre>`;
+          }
+          h += `<p class="text-sm">Auto-purge in <span id="countdown">${this.s.remainingTime}</span>s</p>`;
+          h += '<button type="button" class="button-primary" onclick="Z.handleCleanup()" aria-label="Purge decrypted data now">Purge Now</button>';
+        }
+        h += '</div>';
+        el.innerHTML = h;
+      },
+
+      renderInstr() {
+        const el = document.getElementById('instructionsContent');
+        if (!el) return;
+        let h = '<div class="tab-nav">';
+        const tabs = [
+          { id: 'overview', l: 'Overview' },
+          { id: 'asymmetric-guide', l: 'Asymmetric Mode Guide' },
+          { id: 'sender-guide', l: 'Sender Guide' },
+          { id: 'receiver-guide', l: 'Receiver Guide' },
+          { id: 'encryption-process', l: 'Encryption Process' },
+          { id: 'advanced-settings', l: 'Advanced Settings Guide' },
+          { id: 'security', l: 'Security' },
+          { id: 'legal', l: 'Legal' }
+        ];
+        tabs.forEach(tab => {
+          h += `<button type="button" class="tab-button${this.s.activeTab === tab.id ? ' active' : ''}" onclick="Z.setTab('${tab.id}')">${tab.l}</button>`;
+        });
+        h += '</div>' + this.getTabContent(this.s.activeTab);
+        el.innerHTML = h;
+      },
+
+      getTabContent(t) {
+        if (t === 'overview') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">What is ZeroDeadDrop?</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3"><strong>Simple Explanation:</strong> ZeroDeadDrop encrypts your files entirely in your browser using military-grade encryption (AES-256-GCM). It creates three separate pieces: encrypted data, instructions, and a credential (passphrase or private key). All three are needed to decrypt.</p></div><div class="text-lg font-bold mb-4">Three-Component Security Architecture</div><div class="grid grid-cols-3 gap-4"><div class="text-center p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #3b82f6"><div style="font-size:2rem;margin-bottom:0.5rem">🔒</div><h5 class="font-bold mb-2 text-sm">1. Encrypted Bundle</h5><p class="text-xs" style="color:var(--text-muted)">Your data scrambled with AES-256-GCM encryption (.json file)</p></div><div class="text-center p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #14b8a6"><div style="font-size:2rem;margin-bottom:0.5rem">📋</div><h5 class="font-bold mb-2 text-sm">2. Manifest</h5><p class="text-xs" style="color:var(--text-muted)">Instructions on how to reassemble the encrypted data</p></div><div class="text-center p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #ef4444"><div style="font-size:2rem;margin-bottom:0.5rem">🔑</div><h5 class="font-bold mb-2 text-sm">3. Credential</h5><p class="text-xs" style="color:var(--text-muted)">Symmetric: passphrase<br>Asymmetric: private key + forward secrecy</p></div></div><div class="p-4 rounded-xl" style="background:var(--error-bg);border:2px solid var(--error-border)"><p class="text-center font-bold text-sm" style="color:var(--text-color)">⚠️ CRITICAL: You need ALL THREE pieces. Lose any one = lose your data permanently.</p></div><div class="text-lg font-bold mb-4">What "Zero" Means</div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid var(--security-green)"><div class="font-bold mb-2 text-sm">Zero Servers</div><p class="text-xs" style="color:var(--text-muted)">Everything happens in your browser. No backend, no cloud, no uploads. This HTML file is the entire application.</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid var(--security-green)"><div class="font-bold mb-2 text-sm">Zero Knowledge</div><p class="text-xs" style="color:var(--text-muted)">Developers literally cannot access your data. There's no backend to access, no logs, nothing.</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid var(--security-green)"><div class="font-bold mb-2 text-sm">Zero Data Collection</div><p class="text-xs" style="color:var(--text-muted)">No analytics, cookies, or telemetry. ZeroDeadDrop doesn't know who uses this or what you encrypt.</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid var(--security-green)"><div class="font-bold mb-2 text-sm">Zero Dependencies</div><p class="text-xs" style="color:var(--text-muted)">One self-contained HTML file. No external libraries or frameworks. Works offline.</p></div></div><div class="text-lg font-bold mb-4">Encryption Details</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h6 class="font-bold mb-2 text-sm">Technical Specifications:</h6><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-muted)"><li><strong>AES-256-GCM:</strong> 256-bit Advanced Encryption Standard in Galois/Counter Mode</li><li><strong>Symmetric Mode:</strong> PBKDF2 with 300,000+ iterations, SHA-256/512 hash</li><li><strong>Asymmetric Mode:</strong> ECDH (Elliptic Curve Diffie-Hellman) with P-384 curve for forward secrecy, now supporting multiple recipients</li><li><strong>Random Salts:</strong> Unique 16-byte salt per encryption prevents rainbow table attacks (symmetric only)</li><li><strong>Random IVs:</strong> Unique 12-byte initialization vector per chunk</li><li><strong>Web Crypto API:</strong> Browser's native cryptography (not JavaScript implementations)</li><li><strong>Secure Memory Sanitization:</strong> 180MB constant memory pressure + 5-pass wipe on exit prevents RAM recovery</li></ul></div><div class="text-lg font-bold mb-4">Works Completely Offline</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><h6 class="font-bold mb-2 text-sm" style="color:var(--text-color)">No Internet Required:</h6><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-color)"><li>Save this HTML file to your computer</li><li>Open with any modern browser - works without internet</li><li>Encrypt and decrypt files on air-gapped systems</li><li>Perfect for maximum security environments</li><li>Share this HTML file itself for secure communication</li></ul></div></div>`;
+        if (t === 'asymmetric-guide') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center">🔑 Asymmetric Mode — Forward-Secret Public Key Encryption</div><div class="p-4 rounded-xl" style="background:var(--security-green);color:white"><p class="font-bold text-center text-lg">This is the recommended mode — strictly superior to passphrase sharing in every way.</p></div><div class="text-lg font-bold mb-4">New Feature: Multiple Recipients</div><p class="text-sm mb-4">You can now encrypt for multiple recipients simultaneously. Toggle "Multiple Recipients" in the encryption panel to reveal dynamic fields. Add as many public keys as needed using the "+" button. Each recipient can decrypt independently using their private key.</p><div class="text-lg font-bold mb-4">The Simple Analogy</div><p class="text-sm mb-4">Think of asymmetric encryption like a <strong>mailbox with two keys</strong>:</p><div class="grid grid-cols-2 gap-4 mb-4"><div class="p-4 rounded-xl text-center" style="background:var(--list-bg);border:2px solid #3b82f6"><div style="font-size:2rem;margin-bottom:0.5rem">📮</div><p class="font-bold mb-2 text-sm">Public Key = The mail slot</p><p class="text-xs">Anyone can DROP mail in, but can't READ what's inside</p></div><div class="p-4 rounded-xl text-center" style="background:var(--list-bg);border:2px solid #ef4444"><div style="font-size:2rem;margin-bottom:0.5rem">🔒</div><p class="font-bold mb-2 text-sm">Private Key = The mailbox key</p><p class="text-xs">Only YOU can OPEN and READ the mail</p></div></div><p class="text-sm font-bold mb-4">Key insight: You can give everyone your "mail slot" (public key), and they can send you encrypted messages. Only you can read them with your "mailbox key" (private key).</p><div class="text-lg font-bold mb-4">👥 Who Does What?</div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid var(--security-green)"><h5 class="font-bold mb-2 text-sm">RECEIVER (You want to receive encrypted files)</h5><p class="text-xs mb-2">Do this <strong>ONCE</strong>, keep forever:</p><ol class="list-decimal pl-6 text-xs space-y-1"><li>Click "Generate Asymmetric Keypair" button</li><li>You get TWO keys:<ul class="list-disc pl-6 text-xs mt-1 space-y-1"><li><strong>Public Key</strong> — Share this with EVERYONE who will send you files</li><li><strong>Private Key</strong> — NEVER share this, save it in a password manager</li></ul></li></ol><p class="text-xs mt-4 font-bold">That's it! You're done. Anyone can now send you encrypted files.</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border-left:4px solid #3b82f6"><h5 class="font-bold mb-2 text-sm">SENDER (You want to send encrypted files)</h5><ol class="list-decimal pl-6 text-xs space-y-1"><li>Ask the receiver: "Hey, what's your public key?"</li><li>Paste their public key</li><li>Check "Asymmetric Mode"</li><li>Encrypt files</li><li>Send Bundle + Manifest (any channel)</li><li><strong>NO PASSPHRASE TO SHARE!</strong></li></ol></div></div><div class="text-lg font-bold mb-4">📖 Step-by-Step Example</div><p class="text-sm mb-4"><strong>Scenario: Alice wants to send Bob a confidential document</strong></p><div class="space-y-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid var(--security-green)"><h6 class="font-bold mb-2 text-sm">STEP 1: Bob (Receiver) — One-Time Setup</h6><p class="text-xs mb-2">Bob generates keypair:</p><div class="grid grid-cols-2 gap-4"><div class="p-2 rounded" style="background:var(--card-bg);border:1px solid var(--border-color)"><strong>Public Key (share with Alice):</strong><pre>MIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBxY7+2cF...</pre></div><div class="p-2 rounded" style="background:var(--card-bg);border:1px solid var(--border-color)"><strong>Private Key (save securely):</strong><pre>MIG2AgEAMBAGByqGSM49AgEGBSuBBAAjBIGeMIGbAg...</pre></div></div></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #3b82f6"><h6 class="font-bold mb-2 text-sm">STEP 2: Alice (Sender) — Encrypts</h6><ol class="list-decimal pl-6 text-xs space-y-1"><li>Uploads file</li><li>Checks Asymmetric Mode</li><li>Pastes Bob's public key</li><li>Clicks Start Encryption</li></ol><p class="text-xs mt-2">Creates zd_bundle.json + zd_manifest.json</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #14b8a6"><h6 class="font-bold mb-2 text-sm">STEP 3: Bob (Receiver) — Decrypts</h6><ol class="list-decimal pl-6 text-xs space-y-1"><li>Imports Bundle + Manifest</li><li>Pastes his private key</li><li>Clicks Start Decryption</li><li>Downloads file</li></ol></div></div><div class="text-lg font-bold mb-4">🔬 Behind the Scenes (ECDH Magic)</div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h6 class="font-bold mb-2 text-sm">Encryption (Sender)</h6><ul class="list-disc pl-6 text-xs space-y-1"><li>Generates temporary keypair</li><li>Combines with receiver's public key → shared secret</li><li>Encrypts file</li><li><strong>Wipes temporary private key</strong> (forward secrecy)</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h6 class="font-bold mb-2 text-sm">Decryption (Receiver)</h6><ul class="list-disc pl-6 text-xs space-y-1"><li>Combines own private key with sender's temporary public key (from manifest)</li><li>Recreates same shared secret</li><li>Decrypts file</li></ul></div></div><div class="text-lg font-bold mb-4">About the "Sender Public Key" Shown During Decryption</div><p class="text-sm">When you import a manifest and decrypt in asymmetric mode, you will see a "Sender Public Key" with a copy button.</p><ul class="list-disc pl-6 text-xs space-y-1"><li>This is a <strong>temporary key created by the sender just for this message</strong>. It adds "forward secrecy" – extra protection so that even if someone steals your private key later, they can't read old messages.</li><li><strong>You do not need to copy or forward it.</strong> The app uses it automatically.</li><li>The copy button is there only for experts who want to check the technical details.</li></ul><div class="text-lg font-bold mb-4">When to Use Each Mode</div><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--border-color)"><th style="padding:1rem;text-align:left">Scenario</th><th style="padding:1rem;text-align:left">Asymmetric Preferred</th><th style="padding:1rem;text-align:left">Symmetric Preferred</th></tr></thead><tbody><tr><td style="padding:1rem">Regular/ongoing secure communication</td><td style="padding:1rem">Yes</td><td style="padding:1rem">No</td></tr><tr><td style="padding:1rem">Forward secrecy required</td><td style="padding:1rem">Yes</td><td style="padding:1rem">No</td></tr><tr><td style="padding:1rem">No passphrase transmission</td><td style="padding:1rem">Yes</td><td style="padding:1rem">No</td></tr><tr style="background:var(--list-bg)"><td style="padding:1rem">Plausible deniability needed</td><td style="padding:1rem">No</td><td style="padding:1rem">Yes</td></tr><tr><td style="padding:1rem">One-time anonymous transfer</td><td style="padding:1rem">No</td><td style="padding:1rem">Yes</td></tr><tr style="background:var(--list-bg)"><td style="padding:1rem">Minimal recipient setup</td><td style="padding:1rem">No</td><td style="padding:1rem">Yes</td></tr><tr><td style="padding:1rem">Compatibility with legacy files</td><td style="padding:1rem">No</td><td style="padding:1rem">Yes</td></tr></tbody></table><div class="p-4 rounded-xl mt-4" style="background:var(--error-bg);border:2px solid var(--error-border)"><p class="text-center font-bold text-sm">Use asymmetric mode whenever possible. It's strictly better than passphrase mode for most cases.</p></div></div>`;
+        if (t === 'sender-guide') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Sender's Guide</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">As the sender, your role is to encrypt files or text securely and distribute the components to the recipient.</p></div><div class="text-lg font-bold mb-4">Encryption Modes</div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid var(--security-green)"><h5 class="font-bold mb-2 text-sm">✅ Asymmetric Mode (Recommended)</h5><p class="text-xs mb-2" style="color:var(--text-muted)">Uses receiver's public key. No passphrase to share! Now supports multiple recipients.</p><ol class="list-decimal pl-6 text-xs space-y-1"><li>Ask receiver for their public key</li><li>Enable Asymmetric Mode in Advanced settings</li><li>Toggle "Multiple Recipients" if needed and add keys</li><li>Encrypt → send Bundle + Manifest separately</li><li>Receiver decrypts with their private key</li></ol></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #3b82f6"><h5 class="font-bold mb-2 text-sm">🔐 Symmetric Mode (Traditional)</h5><p class="text-xs mb-2" style="color:var(--text-muted)">Uses shared passphrase. Must share passphrase securely!</p><ol class="list-decimal pl-6 text-xs space-y-1"><li>Create strong passphrase (16+ chars)</li><li>Encrypt files</li><li>Send Bundle, Manifest, Passphrase via different channels</li><li>Receiver decrypts with same passphrase</li></ol></div></div><div class="text-lg font-bold mb-4">Step 1: Prepare Your Data</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Enter text in the provided textarea (optional, up to 1,000,000 characters).</li><li>Upload files by clicking "Choose Files" (total size up to 1GB, individual files up to 500MB).</li><li>Remove any unwanted files using the "Remove" button.</li><li>Note: For optimal performance, it is recommended to encrypt multiple large files separately, as processing several large files simultaneously may cause temporary browser unresponsiveness.</li></ul><div class="text-lg font-bold mb-4">Step 2: Set Encryption Parameters</div><p class="text-xs mb-2"><strong>For Symmetric Mode:</strong></p><ul class="list-disc pl-6 text-xs space-y-2 mb-4"><li>Enter a strong passphrase (minimum 8 characters; recommended 16+ with mix of letters, numbers, symbols).</li><li>Use "Generate" for a random passphrase or "Show/Hide" to view it.</li><li>In Advanced: Choose hash algorithm and iterations.</li></ul><p class="text-xs mb-2"><strong>For Asymmetric Mode:</strong></p><ul class="list-disc pl-6 text-xs space-y-2"><li>Enable "Asymmetric Mode" in Advanced settings</li><li>Obtain receiver's public key (they generate it once using the top card)</li><li>Paste the public key in the "Receiver's Public Key" field</li><li>For multiple recipients: toggle "Multiple Recipients" and use the "+" button to add more keys</li></ul><div class="text-lg font-bold mb-4">Step 3: Configure Output Options</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Check "Auto Download Bundle" to automatically download the encrypted chunks JSON.</li><li>Check "Auto Download Manifest" to automatically download the manifest JSON.</li><li>Check "Auto Download Combined Output" to output a single combined JSON file (not for large batched data).</li><li>Check "Plausible Deniability Mode" (symmetric only) to generate additional decoy outputs, including fake passphrases. These decoys decrypt to harmless test files using the fake passphrases, providing plausible deniability.</li></ul><div class="text-lg font-bold mb-4">Step 4: Encrypt</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Click "Start Encryption".</li><li>Monitor progress; large files may take time. For large data, bundles are automatically split into multiple parts.</li><li>Processing large files (e.g., approaching 1GB) may cause the browser to appear frozen temporarily—please wait, as the operation will complete eventually.</li><li>Upon completion, view/copy/download the manifest, bundle (or bundle parts), or combined output.</li><li>If bundles are split, inform the receiver to import all parts during decryption.</li></ul><div class="text-lg font-bold mb-4">How to Send the Three Pieces</div><div class="p-4 rounded-xl" style="background:var(--error-bg);border:2px solid var(--error-border)"><h4 class="font-bold mb-2 text-sm" style="color:var(--text-color)">⚠️ CRITICAL SECURITY RULE (Symmetric Mode Only)</h4><p class="text-xs" style="color:var(--text-color)">NEVER send the passphrase through the same channel as the manifest or encrypted file! If someone intercepts one communication channel, they should only get one piece (useless alone).</p></div><div class="p-4 rounded-xl mt-4" style="background:var(--security-green);color:white"><h4 class="font-bold mb-2 text-sm">✅ Asymmetric Mode Advantage</h4><p class="text-xs">With asymmetric mode, you only need to send Bundle + Manifest. No passphrase to share! The receiver uses their private key (which you never see or transmit).</p></div><div class="grid grid-cols-3 gap-4 mt-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #3b82f6"><h5 class="font-bold mb-2 text-sm">🔒 Encrypted Bundle</h5><p class="text-xs mb-2">Send via:</p><ul class="list-disc pl-6 text-xs space-y-1"><li>Email attachment</li><li>Cloud storage (Dropbox, Drive)</li><li>File sharing sites</li><li>USB drive</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #14b8a6"><h5 class="font-bold mb-2 text-sm">📋 Manifest</h5><p class="text-xs mb-2">Send via:</p><ul class="list-disc pl-6 text-xs space-y-1"><li>Different email</li><li>Text message</li><li>Messaging app</li><li>Social media DM</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #ef4444"><h5 class="font-bold mb-2 text-sm">🔑 Credential</h5><p class="text-xs mb-2">Asymmetric: Nothing to send!<br>Symmetric: Send via SECURE channel:</p><ul class="list-disc pl-6 text-xs space-y-1"><li>Voice call</li><li>Signal/encrypted chat</li><li>In-person</li><li>Never same as file/manifest</li></ul></div></div><div class="text-lg font-bold mb-4">Offline Security</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><h5 class="font-bold mb-2 text-sm" style="color:var(--text-color)">Maximum Security Setup:</h5><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-color)"><li>Download this HTML file to an air-gapped computer</li><li>Disconnect from internet before opening</li><li>Encrypt your files offline</li><li>Transfer encrypted bundle via USB to connected computer</li><li>Send via normal channels - data is already encrypted</li></ul></div></div>`;
+        if (t === 'receiver-guide') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Receiver's Guide</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">As the receiver, you need to collect all components and use them to decrypt the files.</p></div><div class="text-lg font-bold mb-4">Asymmetric Mode Setup (Recommended)</div><div class="p-4 rounded-xl" style="background:var(--security-green);color:white;margin-bottom:1rem"><h5 class="font-bold mb-2 text-sm">✅ One-Time Setup (Performed by You, the Receiver)</h5><p class="text-xs mb-2">As the person who will receive encrypted files, you must generate your keypair once:</p><ol class="list-decimal pl-6 text-xs space-y-1"><li>Click "Generate Asymmetric Keypair" button (top card)</li><li>Save your private key securely (password manager, offline storage)</li><li>Share your public key with anyone who will send you files</li><li>Keep the private key forever — use it to decrypt all future messages</li></ol></div><div class="p-4 rounded-xl" style="background:var(--error-bg);border:2px solid var(--error-border);margin-bottom:1rem"><p class="text-center font-bold text-xs" style="color:var(--text-color)">⚠️ CRITICAL: Lose your private key = lose access to ALL asymmetric messages forever!</p></div><div class="text-lg font-bold mb-4">Step 1: Collect Components</div><div class="grid grid-cols-3 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #3b82f6"><h5 class="font-bold mb-2 text-sm">🔒 Encrypted Bundle</h5><p class="text-xs">Large JSON file with encrypted chunks (may be multiple parts for large data)</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #14b8a6"><h5 class="font-bold mb-2 text-sm">📋 Manifest</h5><p class="text-xs">Instructions for reassembly (contains sender's public key for asymmetric mode)</p></div><div class="p-4 rounded-xl" style="background:var(--list-bg);border:2px solid #ef4444"><h5 class="font-bold mb-2 text-sm">🔑 Credential</h5><p class="text-xs">Asymmetric: Your private key<br>Symmetric: Shared passphrase from sender</p></div></div><div class="text-lg font-bold mb-4">Step 2: Import Data</div><ul class="list-disc pl-6 text-xs space-y-2"><li>If you have a combined file, use the "Combined" section to import both bundle and manifest at once.</li><li>For bundles: If the sender provided multiple bundle parts, upload all of them using "Upload Bundle File". Then click "Import Bundle" to process all parts.</li><li>Import the manifest file/JSON in the "Manifest" section.</li><li>You can either upload files or paste JSON text directly.</li><li>Note: For optimal performance, it is recommended to decrypt multiple large files separately, as processing several large files simultaneously may cause temporary browser unresponsiveness.</li></ul><div class="text-lg font-bold mb-4">Step 3: Enter Credential</div><p class="text-xs mb-2"><strong>For Asymmetric Mode:</strong></p><ul class="list-disc pl-6 text-xs space-y-2 mb-4"><li>Paste your private key (the one you saved when generating your keypair)</li><li>The manifest contains the sender's public key — no passphrase needed!</li></ul><p class="text-xs mb-2"><strong>For Symmetric Mode:</strong></p><ul class="list-disc pl-6 text-xs space-y-2"><li>Enter the exact passphrase the sender gave you.</li><li>The passphrase is case-sensitive and must be exactly correct.</li></ul><div class="text-lg font-bold mb-4">Step 4: Decrypt</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Click "Start Decryption" after all components are loaded.</li><li>Monitor progress; large files may take time.</li><li>Processing large files (e.g., approaching 1GB) may cause the browser to appear frozen temporarily—please wait, as the operation will complete eventually.</li><li>Upon completion, download files immediately.</li></ul><div class="p-4 rounded-xl" style="background:var(--error-bg);border:2px solid var(--error-border)"><h4 class="font-bold mb-2 text-sm" style="color:var(--text-color)">⚠️ CRITICAL: Automatic Secure Purge</h4><p class="text-xs" style="color:var(--text-color)">After successful decryption, all data is automatically purged from memory after 5 minutes of inactivity. The purge uses military-grade 5-pass memory wiping that makes RAM recovery nearly impossible. Download your files immediately!</p></div><div class="text-lg font-bold mb-4">Troubleshooting</div><div class="space-y-4"><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h5 class="font-bold mb-2 text-sm">"Incorrect passphrase or corrupted data"</h5><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-muted)"><li>Double-check the passphrase/private key (case-sensitive)</li><li>Verify you have the correct manifest and bundle</li><li>Ensure JSON files aren't corrupted</li><li>For asymmetric: make sure you're using YOUR private key (not sender's public key)</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h5 class="font-bold mb-2 text-sm">"Missing chunk metadata"</h5><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-muted)"><li>The manifest and bundle don't match</li><li>Get the correct pair from sender</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h5 class="font-bold mb-2 text-sm">"Out of memory"</h5><ul class="list-disc pl-6 text-xs space-y-1" style="color:var(--text-muted)"><li>Close other browser tabs</li><li>Use desktop browser instead of mobile</li><li>Ask sender to split large files</li></ul></div></div></div>`;
+        if (t === 'encryption-process') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Encryption Process</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">ZeroDeadDrop uses client-side encryption to secure your data. Here's a step-by-step explanation of the process.</p></div><div class="text-lg font-bold mb-4">Symmetric vs Asymmetric Modes</div><div class="grid grid-cols-2 gap-4"><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h5 class="font-bold mb-2 text-sm">Symmetric Mode (Passphrase)</h5><ul class="list-disc pl-6 text-xs space-y-1"><li>Uses PBKDF2 to derive AES-256 key from passphrase</li><li>Same passphrase encrypts and decrypts</li><li>Passphrase must be shared securely</li><li>Unique salt per chunk prevents rainbow tables</li></ul></div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><h5 class="font-bold mb-2 text-sm">Asymmetric Mode (ECDH)</h5><ul class="list-disc pl-6 text-xs space-y-1"><li>ECDH (Elliptic Curve Diffie-Hellman) with P-384 curve</li><li>Sender generates ephemeral keypair</li><li>Derives shared secret with receiver's public key</li><li>Forward secrecy: ephemeral private key destroyed after encryption</li><li>No passphrase to share! Supports multiple recipients.</li></ul></div></div><div class="text-lg font-bold mb-4">1. Data Preparation</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Files/text are split into 4MB chunks for efficient processing.</li></ul><div class="text-lg font-bold mb-4">2. Key Derivation</div><p class="text-xs mb-2"><strong>Symmetric:</strong></p><ul class="list-disc pl-6 text-xs space-y-2 mb-4"><li>Using PBKDF2 with your passphrase, random salt, and chosen parameters to generate a 256-bit AES key.</li></ul><p class="text-xs mb-2"><strong>Asymmetric:</strong></p><ul class="list-disc pl-6 text-xs space-y-2"><li>Sender generates ephemeral ECDH keypair</li><li>Derives shared AES-256 key using sender's ephemeral private key + receiver's public key</li><li>Ephemeral private key is destroyed immediately after encryption (forward secrecy)</li><li>Only receiver can decrypt (using their private key + sender's ephemeral public key from manifest)</li></ul><div class="text-lg font-bold mb-4">3. Chunk Encryption</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Each chunk is encrypted with AES-256-GCM using a unique IV.</li><li>Symmetric mode also uses unique salt per chunk</li><li>Since it is randomized for every chunk, no output is the same even if uploading the same files with the same password.</li></ul><div class="text-lg font-bold mb-4">4. Metadata Encryption</div><ul class="list-disc pl-6 text-xs space-y-2"><li>File names and types are encrypted separately.</li></ul><div class="text-lg font-bold mb-4">5. Output Generation</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Bundle: JSON of all encrypted chunks (auto-split into parts for large data).</li><li>Manifest: JSON with reassembly info (includes sender's ephemeral public key for asymmetric mode).</li><li>Combined: Optional single JSON (not for batched).</li><li>Note: Processing large files (e.g., approaching 1GB) or multiple large files simultaneously may cause the browser to appear frozen temporarily—please wait, as the operation will complete eventually. For optimal performance, it is recommended to encrypt multiple large files separately.</li></ul><div class="text-lg font-bold mb-4">6. Secure Memory Sanitization</div><ul class="list-disc pl-6 text-xs space-y-2"><li>180MB of random data is kept in memory to prevent OS from paging sensitive data to disk/swap</li><li>On exit (close, refresh, or crash), all memory is wiped with 5-pass overwrite (0xAA → 0x55 → 0x00 → 0xFF → 0x00)</li><li>Final 250MB allocation + wipe ensures every accessible memory page is overwritten</li><li>Page is forcefully crashed to about:blank to prevent any recovery</li></ul><div class="text-lg font-bold mb-4">Advanced Settings Explanation</div><p class="text-xs" style="color:var(--text-color)">In the advanced settings, you can customize PBKDF2 iterations and the hash algorithm (symmetric mode only). Iterations determine how many times the passphrase is hashed to derive the key—higher values (e.g., 1,000,000 or more) increase security against brute-force attacks but slow down encryption/decryption. A reasonable maximum is around 10,000,000, depending on your device's processing power; excessive values may cause timeouts or high CPU usage. The hash algorithm can be SHA-256 (standard and efficient) or SHA-512 (slightly more secure with longer digests). For asymmetric mode, the P-384 curve provides excellent security with good performance.</p><div class="p-4 rounded-xl" style="background:var(--error-bg);border:2px solid var(--error-border)"><p class="text-center font-bold text-xs" style="color:var(--text-color)">This app has not been audited. Use for non-critical data only.</p></div></div>`;
+        if (t === 'advanced-settings') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Advanced Settings Guide</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">Detailed explanations of advanced options and how they enhance security.</p></div><div class="text-lg font-bold mb-4">Hash Algorithm (PBKDF2 Only)</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><p class="text-xs"><strong>SHA-256:</strong> Standard, efficient hash function used in PBKDF2 for key derivation.</p><p class="text-xs"><strong>SHA-512:</strong> Longer digest for slightly higher security against certain attacks.</p></div><div class="text-lg font-bold mb-4">PBKDF2 Iterations</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><p class="text-xs">Number of hashing rounds. Higher values (e.g., 300,000–10,000,000) slow down brute-force attacks by requiring more computations. Default: 300,000. The app enforces this by iterating the hash function the specified number of times during key derivation.</p></div><div class="text-lg font-bold mb-4">Compression (gzip)</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><p class="text-xs">Reduces data size before encryption using gzip. Makes outputs smaller (50-70% for text). Handled automatically during encryption/decryption using browser APIs.</p></div><div class="text-lg font-bold mb-4">Auto Download Options</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><p class="text-xs">Automatically downloads bundle, manifest, or combined file after encryption completes.</p></div><div class="text-lg font-bold mb-4">Plausible Deniability (Symmetric Only)</div><div class="p-4 rounded-xl" style="background:var(--list-bg)"><p class="text-xs">Generates fake manifests, bundles, and passphrases that look authentic. The decoy data decrypts to harmless test messages using the fake passphrases, providing plausible deniability by allowing revelation of innocuous content if coerced.</p></div></div>`;
+        if (t === 'security') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Security Considerations</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">While ZeroDeadDrop uses strong encryption, it has not been professionally audited.</p></div><div class="text-lg font-bold mb-4">Strengths</div><ul class="list-disc pl-6 text-xs space-y-2"><li>End-to-end encryption in browser.</li><li>No data leaves your device.</li><li>Multi-component design prevents single-point compromise.</li><li>Automatic data purge after 5 minutes of inactivity.</li><li>Secure memory sanitization with 5-pass wipe (0xAA, 0x55, 0x00, 0xFF, 0x00) prevents RAM recovery.</li><li>180MB constant memory pressure prevents OS paging to disk/swap.</li><li>Automatic wipe on ANY exit (close, refresh, crash, power loss).</li><li>Asymmetric mode provides forward secrecy (ephemeral keys destroyed after encryption).</li><li>Simple masking added to reduce side-channel risks.</li></ul><div class="text-lg font-bold mb-4">Limitations</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Not professionally audited - use for non-critical data.</li><li>Security depends on credential strength (passphrase or private key protection) and component separation.</li><li>Browser vulnerabilities could affect security.</li><li>No key rotation for asymmetric mode (reuse same keypair indefinitely).</li><li>Memory sanitization cannot prevent physical DRAM cold-boot attacks (requires liquid nitrogen).</li></ul><div class="text-lg font-bold mb-4">Best Practices</div><ul class="list-disc pl-6 text-xs space-y-2"><li>Prefer asymmetric mode when possible (no passphrase to share!).</li><li>For symmetric mode: use strong, unique passphrases.</li><li>For asymmetric mode: protect your private key like your life depends on it.</li><li>Distribute components via different channels.</li><li>Verify HTML file integrity before use.</li><li>Use on trusted devices only.</li><li>Download decrypted files immediately - secure purge activates in 5 minutes of inactivity.</li></ul></div>`;
+        if (t === 'legal') return `<div class="space-y-6"><div class="text-2xl font-bold mb-4 text-center" style="color:var(--header-color)">Legal & Disclaimer</div><div class="p-4 rounded-xl" style="background:var(--info-bg);border:2px solid var(--info-border)"><p class="text-sm mb-3" style="color:var(--text-color)">This application is provided "as is" without warranty of any kind.</p></div><div class="text-lg font-bold mb-4">Usage</div><p class="text-xs">Use only for lawful purposes. Do not use for illegal activities.</p><div class="text-lg font-bold mb-4">Liability</div><p class="text-xs">Developers are not liable for any data loss, security breaches, or misuse.</p><div class="text-lg font-bold mb-4">Information</div><p class="text-xs">This is a project by ZeroDeadDrop@gmail.com. More information can be found at https://github.com/ZeroDeadDrop/ZeroDeadDrop</p></div>`;
+        return '';
+      },
+
+      setTab(t) {
+        this.s.activeTab = t;
+        this.renderInstr();
+        this.resetInact();
+      },
+
+      init() {
+        this.boundReset = this.resetInact.bind(this);
+        if (navigator.plugins.length > 10) {
+          showAlert('Many browser extensions detected. For maximum security, disable all non-essential extensions.');
+        }
+        const r = document.getElementById('root');
+        r.innerHTML = `
+          <div class="container">
+            <header role="banner">
+              <div class="warning-banner">Not professionally audited. Use for non-critical data only.</div>
+              <div class="warning-banner">Warning: Do not input information you find in the decoding/decryption section unless you are 100% sure of the source and what it contains.</div>
+              <h1 class="hero-title text-5xl">ZeroDeadDrop</h1>
+              <p class="tagline">A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data • Now with Asymmetric Encryption</p>
+            </header>
+            <nav role="navigation" aria-label="Main actions">
+              <div class="flex justify-center" style="gap:.5rem;margin-bottom:1rem">
+                <button type="button" class="button-primary" onclick="Z.toggleInstructions()" aria-label="Open instructions modal">Instructions</button>
+                <button type="button" class="button-primary" id="themeBtn" onclick="Z.updateTheme()" aria-label="Toggle theme">Light Mode</button>
+              </div>
+            </nav>
+            <main role="main">
+              <section aria-labelledby="keygen-heading" class="card mb-6">
+                <h2 id="keygen-heading" class="text-2xl font-bold mb-4 text-center">Asymmetric Key Management</h2>
+                <p class="text-sm text-center mb-6">Receivers: Generate your keypair <strong>once</strong> and keep the private key forever.</p>
+                <button type="button" class="button-primary w-full" onclick="Z.generateKeypairUI()" aria-label="Generate asymmetric keypair">Generate Asymmetric Keypair (P-384)</button>
+                <div class="warning-banner mt-4">Lose your private key = permanently lose access to all files encrypted for you.</div>
+              </section>
+              <div class="grid-layout">
+                <section aria-labelledby="encoder-heading" id="encoder" class="card"></section>
+                <section aria-labelledby="decoder-heading" id="decoder" class="card"></section>
+              </div>
+            </main>
+            <footer role="contentinfo" class="text-center text-sm mt-4" style="color:var(--text-muted)">© 2026 ZeroDeadDrop • ZeroDeadDrop@gmail.com</footer>
+          </div>`;
+        document.documentElement.classList.toggle('dark', this.s.theme === 'dark');
+        const b = document.getElementById('themeBtn');
+        if (b) b.innerHTML = this.s.theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        const modal = document.getElementById('instructionsModal');
+        modal.addEventListener('click', e => { if (e.target === modal) Z.toggleInstructions(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && Z.s.showInstructionsModal) Z.toggleInstructions(); });
+        this.renderEnc();
+        this.renderDec();
+        this.startInact();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('root').style.display = 'block';
+      }
+    };
+
+    ['beforeunload', 'pagehide', 'unload'].forEach(e => window.addEventListener(e, () => Scrub.nukeEverything()));
+    window.Z = Z;
+    Z.init();
+  </script>
+</body>
+</html>
