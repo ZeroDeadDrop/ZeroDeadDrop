@@ -6,7 +6,7 @@ Military-grade AES-256-GCM + ECDH-P-384 asymmetric encryption that runs **entire
 
 No accounts. No uploads. No telemetry. No trust required.
 
-Just open the file — works offline forever.
+Just open the file and works offline.
 
 ## Why you should actually use it
 
