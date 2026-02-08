@@ -20,7 +20,7 @@ The developer takes security seriously and welcome responsible disclosure.
 
 Email: **ZeroDeadDrop@gmail.com**
 
-**What to include (the more detail, the faster we can respond):**
+**What to include (the more detail, the faster I can respond):**
 
 - Clear description of the vulnerability
 - Affected version(s) and how to reproduce
@@ -29,14 +29,14 @@ Email: **ZeroDeadDrop@gmail.com**
 - Your name/handle (if you want credit in the fix announcement)
 - Preferred contact method if follow-up is needed
 
-We will:
+I will try to:
 
 - Acknowledge receipt within **14 business days**
 - Provide regular status updates
 - Work with you to validate and fix the issue
 - Coordinate public disclosure only **after** a patch is available (usually 30–90 days depending on severity)
 
-We follow **Coordinated Vulnerability Disclosure** principles and will credit reporters unless you prefer anonymity.
+I try to follow **Coordinated Vulnerability Disclosure** principles and will credit reporters unless you prefer anonymity.
 
 ## Supported Browsers & Environments
 
@@ -99,8 +99,8 @@ ZeroDeadDrop **never stores, logs, collects, or transmits** any user data, keys,
 - There are **no databases**.
 - There is **no way** for the developer to access your encrypted material.
 
-If we ever receive a subpoena, court order, or national security letter:  
-**We have nothing to hand over** because nothing is ever sent to us.
+If I ever receive a subpoena, court order, or national security letter:  
+**I have nothing to hand over** because nothing is ever sent to me.
 
 Users are **solely responsible** for:
 
@@ -110,7 +110,7 @@ Users are **solely responsible** for:
 
 ## Responsible Disclosure Hall of Fame
 
-We publicly thank security researchers who responsibly report issues (with permission):
+I will publicly thank security researchers who responsibly report issues (with permission):
 
 - (none yet — be the first!)
 
