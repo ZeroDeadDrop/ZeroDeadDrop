@@ -1,6 +1,6 @@
 # ZeroDeadDrop
 
-**Stateless. Zero-server. Zero-dependency. Offline-first. Forward-secret encryption — in one HTML file.**
+**A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data • Symmetric Encryption • Asymmetric Encryption • Plausible Deniability • Decoy Generator • Offline**
 
 Military-grade AES-256-GCM + ECDH-P-384 asymmetric encryption that runs **entirely in your browser**.
 
