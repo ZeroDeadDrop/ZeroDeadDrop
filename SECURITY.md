@@ -10,7 +10,7 @@ ZeroDeadDrop is a single-file, fully client-side, offline encryption tool.
 Only the **latest tagged release** on GitHub is supported for security fixes.
 
 **Recommendation:** Always use the file directly from  
-https://github.com/ZeroDeadDrop/ZeroDeadDrop/raw/main/ZeroDeadDrop.html  
+https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 ## Reporting a Vulnerability
 
