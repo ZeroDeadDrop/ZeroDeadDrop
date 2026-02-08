@@ -8,6 +8,8 @@ No accounts. No uploads. No telemetry. No trust required.
 
 Just open the file and works offline.
 
+https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
+
 ## Why you should actually use it
 
 - You get **true forward secrecy** (asymmetric mode) without needing Signal, PGP, or any app install  
