@@ -94,7 +94,6 @@ Commercial use / redistribution / derivative works → contact ZeroDeadDrop@gmai
 
 - 🐦 X / Twitter: @TheRedDressNeo (main announcements and crazy stuff cause it's a conspiracy account)  
 - 📧 Email: ZeroDeadDrop@gmail.com  
-- 🐙 GitHub Issues: https://github.com/ZeroDeadDrop/ZeroDeadDrop/issues
 
 Love it? Hate it? Found a bug? Want to sponsor an audit? Just say hi.
 
