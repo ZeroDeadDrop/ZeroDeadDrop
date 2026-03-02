@@ -21,20 +21,20 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 ## Core Features
 
-| Feature                          | Symmetric (passphrase) | Asymmetric (public-key) | Notes / Status                  |
-|----------------------------------|------------------------|--------------------------|---------------------------------|
-| AES-256-GCM                      | Yes                    | Yes                      | per-chunk unique IV + salt      |
-| PBKDF2 key derivation            | Yes                    | —                        | 300k–10M iterations, SHA-256/512|
-| ECDH-P-384 + forward secrecy     | —                      | Yes                      | ephemeral keys, destroyed after encrypt |
-| Multiple recipients              | —                      | Yes                      | encrypt once, many can decrypt  |
-| Compression (gzip)               | Yes                    | Yes                      | before encryption               |
-| Chunked processing (≤4 MB)       | Yes                    | Yes                      | large-file friendly             |
-| Manifest + bundle system         | Yes                    | Yes                      | auto-split for huge payloads    |
-| Plausible deniability / decoys   | Yes                    | No                       | hidden volume + fake files      |
-| Memory sanitization              | Yes                    | Yes                      | 180 MB pressure + 5-pass wipe   |
-| Auto-purge after inactivity      | Yes                    | Yes                      | 5 min default                   |
-| Strict CSP                       | Yes                    | Yes                      | default-src 'none'              |
-| Offline /                        | Yes                    | Yes                      | no network at all               |
+| Feature                          | Symmetric (passphrase) | Asymmetric (public-key) | Notes / Status                              |
+|----------------------------------|------------------------|--------------------------|---------------------------------------------|
+| AES-256-GCM                      | Yes                    | Yes                      | per-chunk unique IV + salt                  |
+| PBKDF2 key derivation            | Yes                    | —                        | 300k–10M iterations, SHA-256/512            |
+| ECDH-P-384 + forward secrecy     | —                      | Yes                      | ephemeral keys, destroyed after encrypt     |
+| Multiple recipients              | —                      | Yes                      | encrypt once, many can decrypt              |
+| Compression (gzip)               | Yes                    | Yes                      | before encryption                           |
+| Chunked processing (≤4 MB)       | Yes                    | Yes                      | large-file friendly                         |
+| Manifest + bundle system         | Yes                    | Yes                      | auto-split for huge payloads                |
+| Plausible deniability / decoys   | Yes                    | No                       | hidden volume + fake files                  |
+| Memory sanitization              | Yes                    | Yes                      | 32 MB pressure + 5-pass wipe                |
+| Auto-purge after inactivity      | Yes                    | Yes                      | 5 min default                               |
+| CSP                              | Partial                | Partial                  | unsafe-inline required (single-file design) |
+| Offline                          | Yes                    | Yes                      | no network at all                           |
 
 ## Quick Start (2 minutes)
 
@@ -50,7 +50,7 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 **Asymmetric (recommended – no passphrase hassle)**
 
-1. Paste the receiver’s **public key**  
+1. Paste the receiver's **public key**  
 2. Enable **Asymmetric Mode**  
 3. (Optional) Add more recipients  
 4. Add files/text → Start Encryption  
@@ -69,14 +69,14 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 3. Paste your **private key** (asymmetric) or passphrase (symmetric)  
 4. Decrypt → download files immediately
 
-## Security posture (Feb 2026)
+## Security posture (Mar 2026)
 
 ✅ Strong primitives (Web Crypto AES-GCM + ECDH-P-384)  
 ✅ Forward secrecy in asymmetric mode  
 ✅ Memory sanitization + auto-purge  
-✅ Strict CSP (no exfil possible via script/style/img)  
 ✅ No external dependencies, no network calls ever  
 
+⚠️ CSP allows unsafe-inline (unavoidable in a single-file app; no external script/style exfil possible)  
 ⚠️ Not formally audited (yet)  
 ⚠️ Decoy generator fingerprintable on mobile/Firefox/Safari (often falls back to GIF or random bytes)  
 ⚠️ Hidden volume offset currently deterministic from password only (should use per-file random salt)
