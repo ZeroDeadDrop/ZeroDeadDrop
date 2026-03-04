@@ -36,6 +36,26 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 | CSP                              | Partial                | Partial                  | unsafe-inline required (single-file design) |
 | Offline                          | Yes                    | Yes                      | no network at all                           |
 
+As for plausible deniability mode, it generates:
+
+One real set
+
+One fake set
+
+But:
+
+A forensic analyst can see:
+
+Two encrypted payload structures
+
+They cannot distinguish which is real,
+but they can detect that there are two.
+
+So:
+
+Plausible deniability works psychologically,
+not cryptographically for right now until I fix how to make it seamless. It is still one container.
+
 ## Quick Start (2 minutes)
 
 ### As Receiver (you want people to send you encrypted stuff)
