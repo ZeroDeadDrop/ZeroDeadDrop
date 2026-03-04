@@ -56,6 +56,9 @@ So:
 Plausible deniability works psychologically,
 not cryptographically for right now until I fix how to make it seamless.
 
+Short answer: yes — for normal use, you still have a seamless “one container” experience.
+But in PD mode specifically, it’s not technically a single hidden container internally.
+
 ## Quick Start (2 minutes)
 
 ### As Receiver (you want people to send you encrypted stuff)
