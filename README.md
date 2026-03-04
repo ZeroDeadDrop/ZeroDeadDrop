@@ -54,7 +54,7 @@ but they can detect that there are two.
 So:
 
 Plausible deniability works psychologically,
-not cryptographically for right now until I fix how to make it seamless. It is still one container.
+not cryptographically for right now until I fix how to make it seamless.
 
 ## Quick Start (2 minutes)
 
