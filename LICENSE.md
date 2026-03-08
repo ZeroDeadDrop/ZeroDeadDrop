@@ -1,4 +1,4 @@
-ZeroDeadDrop Software License v1.0 © 2025 ZeroDeadDrop (a project by Tuyen Evans) All rights reserved.
+ZeroDeadDrop Software License v1.0 © 2025-2026 ZeroDeadDrop (a project by Tuyen Evans) All rights reserved.
 
 **Grant of Use** 
 
