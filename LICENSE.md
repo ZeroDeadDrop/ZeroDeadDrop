@@ -23,10 +23,16 @@ THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
 
-Revocation The copyright holder reserves the right to revoke this license at any time and for any reason. Continued use of the Software after revocation is prohibited.
+**Revocation** 
 
-Attribution If you reference or demonstrate the Software publicly, you must include the following credit: "Based on ZeroDeadDrop by Tuyen Evans."
+The copyright holder reserves the right to revoke this license at any time and for any reason. Continued use of the Software after revocation is prohibited.
 
-Governing Law This License shall be governed by and construed in accordance with the laws of the United States and the State of South Dakota, without regard to its conflict of law principles.
+**Attribution** 
+
+If you reference or demonstrate the Software publicly, you must include the following credit: "Based on ZeroDeadDrop by Tuyen Evans."
+
+**Governing Law** 
+
+This License shall be governed by and construed in accordance with the laws of the United States and the State of South Dakota, without regard to its conflict of law principles.
 
 End of License.
