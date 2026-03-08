@@ -3,13 +3,16 @@ ZeroDeadDrop Software License v1.0 © 2025 ZeroDeadDrop (a project by Tuyen Evan
 **Grant of Use** 
 
 You are hereby granted a limited, non-exclusive, non-transferable, revocable license to use the ZeroDeadDrop software ("the Software") privately and lawfully for personal, educational, or internal research purposes only.
-Restrictions
+
+**Restrictions**
 
 You may not sell, sublicense, rent, distribute, modify, or publicly share the Software or any derivative works without prior written consent from the copyright holder.
 
 You may not use, reproduce, or adapt the ZeroDeadDrop name, logo, or branding in any derivative product without explicit permission.
 
 You must not use the Software for any unlawful activity, including but not limited to: data theft, hacking, terrorism, exploitation, harassment, or the storage or transmission of illegal or prohibited content.
+
+By downloading or using this software you acknowledge it is not intended for government end use and you may not re-export it to sanctioned countries.
 
 **Compliance and Jurisdiction** 
 
@@ -29,7 +32,7 @@ The copyright holder reserves the right to revoke this license at any time and f
 
 **Attribution** 
 
-If you reference or demonstrate the Software publicly, you must include the following credit: "Based on ZeroDeadDrop by Tuyen Evans."
+If you reference or demonstrate the Software publicly, you must include the following credit to the author (Tuyen Evans) and make sure the person understands the legal laws behind it. 
 
 **Governing Law** 
 
