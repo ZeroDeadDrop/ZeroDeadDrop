@@ -1,4 +1,4 @@
-© 2025 ZeroDeadDrop (a project by Tuyen Evans)
+© 2025-2026 ZeroDeadDrop (a project by Tuyen Evans)
 All rights reserved.
 
 This software, including its design, layout, and source code, is protected by copyright law.
