@@ -104,13 +104,13 @@ Use for non-state-level-threat data until an independent audit is completed.
 
 ## License
 
-**ZeroDeadDrop Software License v1.0**  
-(see Modified LICENSE file in repo)
+Licensed under the **ZeroDeadDrop Software License v1.0**  
+(see [LICENSE.md](./LICENSE.md) for full terms)
 
-Free for personal and non-commercial use. Attribution required. No warranty.
-
+Free for personal and non-commercial use. Attribution required. No warranty.  
 Commercial use, redistribution, or derivative works: contact ZeroDeadDrop@gmail.com
 
+© 2025–2026 ZeroDeadDrop (a project by Tuyen Evans). All rights reserved.
 ---
 
 ## Feedback & Contact
