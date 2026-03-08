@@ -1,7 +1,7 @@
 ZeroDeadDrop Privacy Policy
 
 Effective Date: October 2025  
-Copyright © 2025 ZeroDeadDrop (a project by Tuyen Evans)
+Copyright © 2025-2026 ZeroDeadDrop (a project by Tuyen Evans)
 
 Data Collection
 
