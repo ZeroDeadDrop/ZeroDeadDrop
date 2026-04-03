@@ -18,7 +18,7 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 - You can give someone your public key once and they can encrypt for you forever, no passphrase sharing ever again
 - Plausible deniability is built in (symmetric mode): the decoy password shows innocent files, the real password shows your actual data
 - Everything is wiped from RAM after 5 minutes of inactivity or page close (5-pass overwrite + memory pressure)
-- Single HTML file approximately 1.4 MB — save it, air-gap it, burn it to USB, email it, whatever
+- Single HTML file approximately 1.14 MB — save it, air-gap it, burn it to USB, email it, whatever
 - Works in Chrome and Firefox with limited mobile support and more coming (Standard and Safer security levels)
 
 ---
@@ -28,7 +28,7 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 | Feature | Symmetric (passphrase) | Asymmetric (public key) | Notes |
 |---|---|---|---|
 | AES-256-GCM | Yes | Yes | Per-chunk unique IV + salt |
-| PBKDF2 key derivation | Yes | No | 300k to 10M iterations, SHA-256/512 |
+| PBKDF2 key derivation | Yes | No | 4M to 20M iterations, SHA-256/512 |
 | ECDH P-384 + forward secrecy | No | Yes | Ephemeral keys destroyed after encrypt |
 | Multiple recipients | No | Yes | Encrypt once, many can decrypt |
 | Compression (gzip) | Yes | Yes | Applied before encryption |
@@ -44,9 +44,9 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 ## A Note on Plausible Deniability
 
-In Plausible Deniability mode, the app generates one real encrypted set and one fake encrypted set. A forensic analyst can see two encrypted payload structures. They cannot distinguish which is real, but they can detect that two exist.
+In Plausible Deniability mode (Hidden Volume), the app produces a single binary container file with two independently encrypted volumes embedded at password-derived random offsets inside a 4 MB noise header. Each volume is encrypted with a separate key derived from its own password and a unique per-file random salt.
 
-So: plausible deniability works psychologically, not cryptographically, for now. For normal use you still have a seamless experience. But in PD mode specifically it is not technically a single hidden container internally. This is something being actively worked on.
+Entering the decoy password reveals only the decoy files. Entering the real password reveals only your actual encrypted files. Neither password can derive the other volume's key. A forensic examiner can identify the file as a ZeroDeadDrop container by structure, but cannot read either volume without the correct password.
 
 ---
 
@@ -86,17 +86,17 @@ You never need to do this step again.
 
 ---
 
-## Security Posture (March 2026)
+## Security Posture (April 2026)
 
 ✅ Strong primitives (Web Crypto AES-GCM + ECDH P-384)  
 ✅ Forward secrecy in asymmetric mode  
 ✅ Memory sanitization + auto-purge  
 ✅ No external dependencies, no network calls ever  
+✅ Hidden volume offsets derived from password + per-container random salt  
 
 ⚠️ CSP allows unsafe-inline (unavoidable in a single-file app; no external script or style exfiltration is possible)  
 ⚠️ Not formally audited yet  
 ⚠️ Decoy generator is fingerprintable on mobile, Firefox, and Safari (often falls back to GIF or random bytes)  
-⚠️ Hidden volume offset is currently deterministic from password only (should use per-file random salt)  
 
 Use for non-state-level-threat data until an independent audit is completed.
 
@@ -111,6 +111,7 @@ Free for personal and non-commercial use. Attribution required. No warranty.
 Commercial use, redistribution, or derivative works: contact ZeroDeadDrop@gmail.com
 
 © 2025–2026 ZeroDeadDrop (a project by Tuyen Evans). All rights reserved.
+
 ---
 
 ## Feedback & Contact
