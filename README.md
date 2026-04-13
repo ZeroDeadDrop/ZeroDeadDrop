@@ -6,7 +6,7 @@ Last Updated: 4.12.26
 
 This is not a messaging app. 
 
-It is a Digital DeadDrop Preparation Tool
+It is a Digital DeadDrop Preparation Tool but you can send the outputs through normal channels if you would like.
 
 A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data • Symmetric Encryption • Asymmetric Encryption • Plausible Deniability • Decoy File Generator • Offline
 
