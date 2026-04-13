@@ -1,7 +1,8 @@
 # ZeroDeadDrop
 
-v8 
-4.12.26
+Most Recent Version: v8 
+
+Last Updated: 4.12.26
 
 A Stateless Client-based Privacy-first Application With Zero Servers, Zero Dependencies, Zero Data Collection, and Zero Knowledge of Your Data • Symmetric Encryption • Asymmetric Encryption • Plausible Deniability • Decoy File Generator • Offline
 
