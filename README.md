@@ -4,7 +4,9 @@ Most Recent Version: v8
 
 Last Updated: 4.12.26
 
-This is not a messaging app. 
+This is not a messaging app. You encrypt your files and get outputs. There are hidden volumes you can choose to do with plausible deniability.
+
+You control the encryption, outputs, and how to send the outputs. It can be generated offline and decrypted offline.
 
 It is a Digital DeadDrop Preparation Tool but you can send the outputs through normal channels if you would like.
 
