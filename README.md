@@ -1,6 +1,6 @@
 # ZeroDeadDrop
-**Most Recent Version:** v8  
-**Last Updated:** April 12, 2026
+**Most Recent Version:** v8.0.1  
+**Last Updated:** April 14, 2026
 
 This is **not** a messaging app.  
 It is a **Digital DeadDrop Preparation Tool**. You encrypt your files locally and receive encrypted outputs that you can send through any channel you choose (USB, email, mail, anonymous upload, etc.).
