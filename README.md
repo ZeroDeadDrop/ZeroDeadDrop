@@ -1,7 +1,7 @@
 # ZeroDeadDrop
 
-**Most Recent Version:** v8.0.1  
-**Last Updated:** April 14, 2026
+**Most Recent Version:** v8.0.2  
+**Last Updated:** April 15, 2026
 
 **A Stateless, Client-Side, Privacy-First Encryption App**
 
