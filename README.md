@@ -1,35 +1,42 @@
 # ZeroDeadDrop
+
 **Most Recent Version:** v8.0.1  
 **Last Updated:** April 14, 2026
+
+**A Stateless, Client-Side, Privacy-First Encryption App**
+
+**Zero Servers**  
+**Zero Remote Network Requests**  
+**Zero Telemetry**  
+**Zero Dependencies**  
+**Zero Backend**  
+**Zero Install**  
+**Zero Data Out**
+
+Symmetric Encryption · Asymmetric Encryption · Plausible Deniability · Decoy Generator
+
+---
 
 This is **not** a messaging app.  
 It is a **Digital DeadDrop Preparation Tool**. You encrypt your files locally and receive encrypted outputs that you can send through any channel you choose (USB, email, mail, anonymous upload, etc.).
 
-A stateless, client-side, privacy-first application.  
-**Zero Servers • Zero Dependencies • Zero Data Collection • Zero Knowledge of Your Data**
-
-- Symmetric Encryption (AES-256-GCM)  
-- Asymmetric Encryption (ECDH P-384)  
-- Built-in Plausible Deniability  
-- Realistic Decoy File Generator  
-- Fully Offline
-
-AES-256-GCM + ECDH P-384 asymmetric encryption that runs entirely in your browser using the Web Crypto API.
-
+AES-256-GCM + ECDH P-384 asymmetric encryption that runs entirely in your browser using the Web Crypto API.  
 No accounts. No uploads. No telemetry. No trust required.  
+
 Just open the HTML file and it works offline.
 
-https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
+**Repository:** https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 ---
 
 ## Why You Should Actually Use It
-- Per-message forward secrecy in asymmetric mode without needing Signal, PGP, or any app installation
-- Give someone your public key once — they can encrypt files for you indefinitely without ever sharing a passphrase
-- Strong plausible deniability (symmetric mode): the decoy password reveals innocent files; the real password reveals your actual data
-- Aggressive memory sanitization — everything is wiped from RAM after 5 minutes of inactivity or when the page closes (adaptive pressure + 5-pass overwrite)
-- Single HTML file (~1.15 MB) — save it, air-gap it, burn it to USB, email it, or run it from anywhere
-- Works best in Chrome and Firefox (limited mobile support, with improvements planned)
+
+- Per-message forward secrecy in asymmetric mode without needing Signal, PGP, or any app installation.  
+- Give someone your public key once — they can encrypt files for you indefinitely without ever sharing a passphrase.  
+- Strong plausible deniability (symmetric mode): the decoy password reveals innocent files; the real password reveals your actual data.  
+- Aggressive memory sanitization — everything is wiped from RAM after 5 minutes of inactivity or when the page closes (adaptive pressure + 5-pass overwrite).  
+- Single HTML file (~1.15 MB) — save it, air-gap it, burn it to USB, email it, or run it from anywhere.  
+- Works best in Chrome and Firefox (limited mobile support, with improvements planned).
 
 ---
 
@@ -53,6 +60,7 @@ https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 ---
 
 ## A Note on Plausible Deniability
+
 In Hidden Volume mode, the app produces a single binary container with two independently encrypted volumes. These volumes are placed at password-derived positions inside a 4 MB noise header. Each volume uses its own password-derived key and a unique random salt.
 
 Entering the **decoy password** reveals only the innocent decoy files.  
@@ -65,35 +73,37 @@ Neither password can derive the other volume’s key. A forensic examiner can re
 ## Quick Start (2 minutes)
 
 ### As Receiver (people will send you encrypted files)
-1. Open `ZeroDeadDrop.html`
-2. Click **Generate Asymmetric Keypair**
-3. Save your **private key** somewhere very secure (offline storage or password manager)
-4. Share your **public key** with anyone who should be able to send you files
+1. Open `ZeroDeadDrop.html`  
+2. Click **Generate Asymmetric Keypair**  
+3. Save your **private key** somewhere very secure (offline storage or password manager)  
+4. Share your **public key** with anyone who should be able to send you files  
 
 You only need to do this once.
 
 ### As Sender
-**Asymmetric mode (recommended — no passphrase sharing)**
-1. Paste the receiver’s public key
-2. Enable Asymmetric Mode
-3. Optionally add more recipients
-4. Add your files or text and click **Start Encryption**
+
+**Asymmetric mode (recommended — no passphrase sharing)**  
+1. Paste the receiver’s public key  
+2. Enable Asymmetric Mode  
+3. Optionally add more recipients  
+4. Add your files or text and click **Start Encryption**  
 5. Send the resulting manifest and bundle(s) via any channel (even insecure ones)
 
-**Symmetric mode (classic passphrase)**
-1. Enter a strong passphrase (16+ characters recommended)
-2. Add your files or text and click **Start Encryption**
+**Symmetric mode (classic passphrase)**  
+1. Enter a strong passphrase (16+ characters recommended)  
+2. Add your files or text and click **Start Encryption**  
 3. Send the manifest, bundle(s), and passphrase via **separate channels**
 
 ### Decrypt (for receiver)
-1. Open the same HTML file
-2. Import the manifest and bundle(s)
-3. Paste your private key (asymmetric) or passphrase (symmetric)
+1. Open the same HTML file  
+2. Import the manifest and bundle(s)  
+3. Paste your private key (asymmetric) or passphrase (symmetric)  
 4. Click Decrypt and download your files
 
 ---
 
 ## Security Posture (April 2026)
+
 ✅ Strong primitives (Web Crypto AES-GCM + ECDH P-384)  
 ✅ Per-message forward secrecy in asymmetric mode via ephemeral keys  
 ✅ Aggressive memory sanitization and auto-purge  
@@ -109,19 +119,21 @@ You only need to do this once.
 ---
 
 ## License
+
 Licensed under the **ZeroDeadDrop Software License v1.0**  
-(see [LICENSE.md](./LICENSE.md) for full terms)
+(see [LICENSE.md](./LICENSE.md) for full terms)  
 
 Free for personal and non-commercial use. Attribution required. No warranty.  
-Commercial use, redistribution, or derivative works: contact ZeroDeadDrop@gmail.com
+Commercial use, redistribution, or derivative works: contact ZeroDeadDrop@gmail.com  
 
 © 2025–2026 ZeroDeadDrop (a project by Tuyen Evans). All rights reserved.
 
 ---
 
 ## Feedback & Contact
+
 🐦 X / Twitter: [@TheRedDressNeo](https://x.com/TheRedDressNeo) (main announcements)  
-📧 Email: ZeroDeadDrop@gmail.com
+📧 Email: ZeroDeadDrop@gmail.com  
 
 Love it? Hate it? Found a bug? Want to sponsor an audit? Just say hi.
 
