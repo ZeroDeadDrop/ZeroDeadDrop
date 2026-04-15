@@ -36,7 +36,7 @@ Just open the HTML file and it works offline.
 - Strong plausible deniability (symmetric mode): the decoy password reveals innocent files; the real password reveals your actual data.  
 - Aggressive memory sanitization — everything is wiped from RAM after 5 minutes of inactivity or when the page closes (adaptive pressure + 5-pass overwrite).  
 - Single HTML file (~1.15 MB) — save it, air-gap it, burn it to USB, email it, or run it from anywhere.  
-- Works best in Chrome and Firefox (limited mobile support, with improvements planned).
+- Works best in Offline on Airgapped systems with a long high entropy password.
 
 ---
 
