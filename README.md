@@ -18,14 +18,24 @@ Symmetric Encryption · Asymmetric Encryption · Plausible Deniability · Decoy 
 ---
 
 This is **not** a messaging app.  
-It is a **Digital DeadDrop Preparation Tool**. You encrypt your files locally and receive encrypted outputs that you can send through any channel you choose (USB, email, mail, anonymous upload, etc.). The receiver then decrypts the file online or offline if they choose using the same html file. Make sure you are using the same version. The memory is ephemeral because it uses the browser memory which is eventually not able to be retrieved after awhile in any meaningful way. I could have made it a self contained app with no browser but I chose to do it this way as I believe it would be better if you could use it anywhere, at anytime for true ZeroDeadDrops. I decided to not use Argon even though it is a better crypto because it defeats my zero motto as it is an external library. There are many decisions I make over others because of things like this such as the difference between Chrome and Firefox browsers and how I handle that. Even if your data was forensically found, it is encrypted and if you have a long entropy password, it should be realistically safe. More information in the instructions in the app.
+It is a **Digital DeadDrop Preparation Tool**. You encrypt files locally in your browser and receive encrypted outputs that can be transferred through any channel you choose (USB, email, physical transfer, anonymous upload, etc.). The recipient can then decrypt the file using the same HTML application, either online or fully offline. Both sides must use the same version for compatibility.
 
-AES-256-GCM + ECDH P-384 asymmetric encryption that runs entirely in your browser using the Web Crypto API.  
-No accounts. No uploads. No telemetry. No trust required.  
+The application is designed around ephemeral browser-based memory, meaning no persistent user data is stored beyond the session in any meaningful or recoverable way.
 
-Just open the HTML file and it works offline.
+It is intentionally built as a single self-contained HTML file to maximize portability and allow use anywhere, at any time, enabling true ZeroDeadDrop workflows.
 
-**Repository:** https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
+Certain cryptographic libraries (such as Argon2) were intentionally not used in order to maintain the “zero external dependencies” design principle. This is a deliberate tradeoff between ideal cryptographic standards and strict self-containment.
+
+Even if encrypted data is recovered through forensic means, it remains protected by AES-256-GCM encryption. With a sufficiently high-entropy password, the data is intended to be computationally infeasible to decrypt.
+
+More details are available in the in-app instructions.
+
+AES-256-GCM + ECDH P-384 asymmetric encryption running entirely in the browser using the Web Crypto API.  
+No accounts. No uploads. No telemetry. No external trust required.
+
+Just open the HTML file and it works completely offline.
+
+Repository: https://github.com/ZeroDeadDrop/ZeroDeadDrop.git
 
 ---
 
