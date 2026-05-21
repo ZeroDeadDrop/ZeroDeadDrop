@@ -1,5 +1,4 @@
 # ZeroDeadDrop
-
 **Most Recent Version:** v11.1.0  
 **Last Updated:** May 20, 2026
 
@@ -18,12 +17,12 @@ Symmetric Encryption · Asymmetric Encryption · Plausible Deniability · Decoy 
 ---
 
 This is **not** a messaging app.  
-It is a **Digital DeadDrop Preparation Tool**. You encrypt files locally in your browser and receive encrypted outputs that can be transferred through any channel you choose (USB, email, physical transfer, anonymous upload, etc.). The recipient can then decrypt the file using the same HTML application, either online or fully offline. Both sides must use the same version for compatibility.
+It is a **Digital DeadDrop Preparation Tool**. You encrypt files locally in your browser and receive encrypted outputs that can be transferred through any channel you choose (USB, email, physical transfer, anonymous upload, etc.). The recipient can then decrypt the file using the same HTML application, either online or fully offline. Same version recommended for best compatibility; older formats are supported.
 
 The application is designed around ephemeral browser-based memory, meaning no persistent user data is stored beyond the session in any meaningful or recoverable way.  
 It is intentionally built as a single self-contained HTML file to maximize portability and allow use anywhere, at any time, enabling true ZeroDeadDrop workflows.
 
-Certain cryptographic libraries (such as Argon2) were intentionally not used in order to maintain the “zero external dependencies” design principle. This is a deliberate tradeoff between ideal cryptographic standards and strict self-containment.
+Certain cryptographic libraries (such as Argon2) were intentionally not used in order to maintain the "zero external dependencies" design principle. This is a deliberate tradeoff between ideal cryptographic standards and strict self-containment.
 
 Even if encrypted data is recovered through forensic means, it remains protected by AES-256-GCM encryption. With a sufficiently high-entropy password, the data is intended to be computationally infeasible to decrypt.
 
@@ -43,7 +42,7 @@ Just open the HTML file and it works completely offline.
 - Give someone your public key once — they can encrypt files for you indefinitely without ever sharing a passphrase.
 - **Strong plausible deniability** (symmetric mode): the decoy password reveals innocent files; the real password reveals your actual sensitive data.
 - Aggressive memory sanitization — everything is wiped from RAM after 5 minutes of inactivity or when the page closes (adaptive pressure + multi-pass overwrite).
-- Single HTML file **(~1.23 MB)** — save it, air-gap it, burn it to USB, email it, or run it from anywhere.
+- Single HTML file **(~1.15 MB)** — save it, air-gap it, burn it to USB, email it, or run it from anywhere.
 - Works best in an air-gapped system offline with a long, high-entropy password for maximum security.
 
 ---
@@ -57,7 +56,7 @@ Just open the HTML file and it works completely offline.
 | ECDH P-384                     | No                     | Yes                      | Ephemeral keys destroyed after encryption |
 | Multiple recipients            | No                     | Yes                      | Encrypt once, many can decrypt |
 | Compression (gzip)             | Yes                    | Yes                      | Applied before encryption |
-| Chunked processing             | Yes                    | Yes                      | Large-file friendly (4 MB max per chunk) |
+| Chunked processing             | Yes                    | Yes                      | 4–8 MB per chunk depending on file size |
 | Manifest + bundle system       | Yes                    | Yes                      | Auto-split for very large payloads |
 | Plausible deniability / decoys | Yes                    | No                       | **Improved Hidden Volume support** |
 | Memory sanitization            | Yes                    | Yes                      | 8–32 MB adaptive pressure + multi-pass wipe |
@@ -76,7 +75,7 @@ In **Hidden Volume** mode, the app produces a single binary container with two i
 - Entering the **decoy password** reveals only the innocent decoy files.  
 - Entering the **real password** reveals only your actual sensitive files.
 
-Neither password can derive the other volume’s key. A forensic examiner can recognize the file as a ZeroDeadDrop container, but cannot access either volume without the correct password.
+Neither password can derive the other volume's key. A forensic examiner can recognize the file as a ZeroDeadDrop container, but cannot access either volume without the correct password.
 
 v11 significantly improves the Hidden Volume workflow with a dedicated UI, separate real/decoy password handling, and a secure password copy dialog.
 
@@ -95,7 +94,7 @@ You only need to do this once.
 ### As Sender
 
 **Asymmetric mode (recommended — no passphrase sharing)**
-1. Paste the receiver’s public key
+1. Paste the receiver's public key
 2. Enable Asymmetric Mode
 3. Optionally add more recipients
 4. Add your files or text and click **Start Encryption**
@@ -122,7 +121,6 @@ You only need to do this once.
 ✅ Aggressive memory sanitization and auto-purge  
 ✅ No external dependencies or network calls ever  
 ✅ Hidden volume offsets derived from password + per-container random salt  
-
 ⚠️ CSP allows `unsafe-inline` (unavoidable in a single-file app)  
 ⚠️ Not formally audited yet  
 ⚠️ Decoy generator can be fingerprinted on some browsers/devices  
