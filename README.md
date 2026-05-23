@@ -137,7 +137,7 @@ Licensed under the **ZeroDeadDrop Software License v1.0**
 Free for personal and non-commercial use. Attribution required. No warranty.  
 Commercial use, redistribution, or derivative works: contact ZeroDeadDrop@gmail.com
 
-© 2025–2026 ZeroDeadDrop (a project by Tuyen Evans). All rights reserved.
+© 2025–2026 ZeroDeadDrop. All rights reserved.
 
 ---
 
