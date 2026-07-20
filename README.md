@@ -1,6 +1,7 @@
 # ZeroDeadDrop
-**Most Recent Version:** v11.1.0  
-**Last Updated:** May 20, 2026
+
+**Most Recent Version:** v12.0.0  
+**Last Updated:** July 20, 2026
 
 **A Stateless, Client-Side, Privacy-First Encryption App**
 
@@ -22,7 +23,7 @@ It is a **Digital DeadDrop Preparation Tool**. You encrypt files locally in your
 The application is designed around ephemeral browser-based memory, meaning no persistent user data is stored beyond the session in any meaningful or recoverable way.  
 It is intentionally built as a single self-contained HTML file to maximize portability and allow use anywhere, at any time, enabling true ZeroDeadDrop workflows.
 
-Certain cryptographic libraries (such as Argon2) were intentionally not used in order to maintain the "zero external dependencies" design principle. This is a deliberate tradeoff between ideal cryptographic standards and strict self-containment.
+To maintain the "zero external dependencies" design principle, cryptographic primitives not natively available through the browser's Web Crypto API — including a full Argon2id (RFC 9106) implementation — are hand-written from scratch directly in this file rather than pulled in as libraries. This is a deliberate tradeoff: it costs real engineering effort and, for Argon2id specifically, more raw CPU time than an optimized native or WASM library would need, in exchange for strict self-containment and the ability to audit every line that touches your data.
 
 Even if encrypted data is recovered through forensic means, it remains protected by AES-256-GCM encryption. With a sufficiently high-entropy password, the data is intended to be computationally infeasible to decrypt.
 
@@ -42,7 +43,7 @@ Just open the HTML file and it works completely offline.
 - Give someone your public key once — they can encrypt files for you indefinitely without ever sharing a passphrase.
 - **Strong plausible deniability** (symmetric mode): the decoy password reveals innocent files; the real password reveals your actual sensitive data.
 - Aggressive memory sanitization — everything is wiped from RAM after 5 minutes of inactivity or when the page closes (adaptive pressure + multi-pass overwrite).
-- Single HTML file **(~1.15 MB)** — save it, air-gap it, burn it to USB, email it, or run it from anywhere.
+- Single HTML file **(~1.13 MB)** — save it, air-gap it, burn it to USB, email it, or run it from anywhere.
 - Works best in an air-gapped system offline with a long, high-entropy password for maximum security.
 
 ---
@@ -53,12 +54,13 @@ Just open the HTML file and it works completely offline.
 |--------------------------------|------------------------|--------------------------|-------|
 | AES-256-GCM                    | Yes                    | Yes                      | Per-chunk unique IV + salt |
 | PBKDF2 key derivation          | Yes                    | No                       | 4M–20M iterations, SHA-512 |
+| Argon2id key derivation        | Yes                    | No                       | RFC 9106, memory-hard (64 MB / 3 passes by default); hand-written pure-JS implementation, selectable as an alternative to PBKDF2 |
 | ECDH P-384                     | No                     | Yes                      | Ephemeral keys destroyed after encryption |
 | Multiple recipients            | No                     | Yes                      | Encrypt once, many can decrypt |
 | Compression (gzip)             | Yes                    | Yes                      | Applied before encryption |
 | Chunked processing             | Yes                    | Yes                      | 4–8 MB per chunk depending on file size |
 | Manifest + bundle system       | Yes                    | Yes                      | Auto-split for very large payloads |
-| Plausible deniability / decoys | Yes                    | No                       | **Improved Hidden Volume support** |
+| Plausible deniability / decoys | Yes                    | No                       | Hidden Volume support |
 | Memory sanitization            | Yes                    | Yes                      | 8–32 MB adaptive pressure + multi-pass wipe |
 | Auto-purge after inactivity    | Yes                    | Yes                      | 5 minutes default |
 | CSP                            | Partial                | Partial                  | `unsafe-inline` required (single-file) |
@@ -77,7 +79,7 @@ In **Hidden Volume** mode, the app produces a single binary container with two i
 
 Neither password can derive the other volume's key. A forensic examiner can recognize the file as a ZeroDeadDrop container, but cannot access either volume without the correct password.
 
-v11 significantly improves the Hidden Volume workflow with a dedicated UI, separate real/decoy password handling, and a secure password copy dialog.
+The Hidden Volume workflow includes a dedicated UI with separate real/decoy password handling and a secure password copy dialog.
 
 ---
 
@@ -113,7 +115,7 @@ You only need to do this once.
 
 ---
 
-## Security Posture (May 2026)
+## Security Posture (July 2026)
 
 ✅ Strong primitives (Web Crypto AES-GCM + ECDH P-384)  
 ✅ Per-message forward secrecy in asymmetric mode via ephemeral keys  
@@ -122,7 +124,7 @@ You only need to do this once.
 ✅ No external dependencies or network calls ever  
 ✅ Hidden volume offsets derived from password + per-container random salt  
 ⚠️ CSP allows `unsafe-inline` (unavoidable in a single-file app)  
-⚠️ Not formally audited yet  
+⚠️ Extensively self-tested (crypto primitives checked against reference implementations, full functional test suite, real-browser execution testing) but not yet independently audited by a professional third party  
 ⚠️ Decoy generator can be fingerprinted on some browsers/devices  
 
 **Use for non-state-level-threat data until an independent audit is completed.**
