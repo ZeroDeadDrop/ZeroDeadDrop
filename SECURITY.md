@@ -1,6 +1,6 @@
 ZeroDeadDrop Security Policy
-Last updated: April 02, 2026
-Current version: 5.0.0
+Last updated: July 20, 2026
+Current version: 12.0.0
 
 ZeroDeadDrop is a single-file, fully client-side, offline encryption tool.
 
@@ -77,17 +77,27 @@ same channel, or losing your private key are the most common failure points.
 Cryptographic Primitives
 Primitive       Usage                          Notes
 AES-256-GCM     All data encryption            Authenticated encryption, 96-bit IV per chunk
-PBKDF2          Symmetric key derivation       SHA-256 or SHA-512, 4M to 20M iterations,
-                                               unique salt per chunk
+PBKDF2          Symmetric key derivation       SHA-256 or SHA-512, 4M to 20M iterations
+                (default)
+Argon2id        Symmetric key derivation       RFC 9106, memory-hard (64 MB / 3 passes by
+                (optional alternative)         default); hand-written pure-JS implementation
+                                               (uses BLAKE2b internally), selectable in place
+                                               of PBKDF2
 ECDH P-384      Asymmetric shared secret       NIST P-384 curve, forward secrecy via
                                                ephemeral keys
 HKDF            Session key derivation         SHA-384
-                (asymmetric)
-Web Crypto API  All crypto operations          Native browser implementation, no JavaScript
-                                               crypto polyfills
+                (asymmetric); per-chunk
+                sub-key derivation
 
-No custom cryptographic implementations. Everything uses the browser's hardened native
-primitives.
+Most crypto operations use the browser's native, hardened Web Crypto API (AES-GCM, PBKDF2,
+ECDH, HKDF). The one exception is Argon2id: since it is not part of Web Crypto, and adding
+it would mean either an external library or an embedded compiled binary — both against this
+project's zero-dependency, fully-readable-source principle — it is implemented from scratch
+in pure JavaScript directly in this file (RFC 9106, including its own BLAKE2b). That
+implementation has been checked against a reference implementation of the real algorithm
+across multiple parameter sets, including production parameters. If you are auditing this
+project, that is the one piece of the crypto path that is not simply "trust the browser" —
+everything else is.
 
 Data Retention and Compliance
 ZeroDeadDrop never stores, logs, collects, or transmits any user data, keys, or content.
